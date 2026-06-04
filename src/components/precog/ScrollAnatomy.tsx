@@ -52,7 +52,7 @@ export function ScrollAnatomy() {
   const ringOpacity = useTransform(p, [0, 0.1, 0.15], [0, 1, 1]);
 
   // active milestone index for left text
-  const activeIdx = useTransform(p, (v) => {
+  const activeIdx = useTransform(p, (v): number => {
     if (v < 0.18) return 0;
     if (v < 0.42) return 1;
     if (v < 0.65) return 2;
