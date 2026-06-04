@@ -33,7 +33,7 @@ export function Nav() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
         <a
           href="#top"
-          className={`font-mono-ui text-[11px] uppercase text-ink ${woke ? "wordmark-awake" : "wordmark-breathe"}`}
+          className={`font-mono-ui uppercase text-ink font-medium text-base ${woke ? "wordmark-awake" : "wordmark-breathe"}`}
           style={{ letterSpacing: "0.18em" }}
         >
           00bit
