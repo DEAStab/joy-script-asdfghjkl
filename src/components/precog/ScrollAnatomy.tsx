@@ -109,15 +109,33 @@ function Milestone({
   activeIdx: MotionValue<number>;
   milestone: { label: string; title: string; body: string };
 }) {
-  const opacity = useTransform(activeIdx, (v) => (Math.round(v) === index ? 1 : 0.12));
-  const y = useTransform(activeIdx, (v) => (Math.round(v) === index ? 0 : 8));
+  const opacity = useTransform(activeIdx, (v) => (Math.round(v) === index ? 1 : 0));
+  const y = useTransform(activeIdx, (v) => (Math.round(v) === index ? 0 : 12));
+  const pointerEvents = useTransform(activeIdx, (v) =>
+    Math.round(v) === index ? "auto" : "none"
+  );
 
   return (
     <motion.div
-      style={{ opacity, y }}
-      transition={{ duration: 0.4 }}
+      style={{ opacity, y, pointerEvents }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className="absolute inset-0 flex flex-col justify-center"
     >
+      <div className="font-mono-ui text-[11px] uppercase tracking-[0.3em] text-cobalt">
+        {milestone.label}
+      </div>
+      <h3
+        className="font-display italic text-ink mt-5 leading-[1.05]"
+        style={{ fontSize: "clamp(30px, 3.4vw, 48px)" }}
+      >
+        {milestone.title}
+      </h3>
+      <p className="font-body text-ink-soft mt-6 max-w-[44ch] text-[16px] leading-relaxed">
+        {milestone.body}
+      </p>
+    </motion.div>
+  );
+}
       <div className="font-mono-ui text-[11px] uppercase tracking-[0.3em] text-cobalt">
         {milestone.label}
       </div>
