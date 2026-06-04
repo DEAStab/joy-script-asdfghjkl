@@ -136,21 +136,6 @@ function Milestone({
     </motion.div>
   );
 }
-      <div className="font-mono-ui text-[11px] uppercase tracking-[0.3em] text-cobalt">
-        {milestone.label}
-      </div>
-      <h3
-        className="font-display italic text-ink mt-5 leading-[1.05]"
-        style={{ fontSize: "clamp(30px, 3.4vw, 48px)" }}
-      >
-        {milestone.title}
-      </h3>
-      <p className="font-body text-ink-soft mt-6 max-w-[44ch] text-[16px] leading-relaxed">
-        {milestone.body}
-      </p>
-    </motion.div>
-  );
-}
 
 function Schematic({
   pAtlas,
