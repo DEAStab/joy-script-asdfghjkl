@@ -8,8 +8,14 @@ const links = [
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const [woke, setWoke] = useState(false);
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 80);
+      if (y > 10) setWoke(true);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -27,9 +33,10 @@ export function Nav() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
         <a
           href="#top"
-          className="relative font-mono-ui text-[18px] md:text-[20px] font-medium uppercase tracking-[0.32em] text-ink px-3 py-1.5 breathe-cobalt"
+          className={`font-mono-ui text-[11px] uppercase text-ink ${woke ? "wordmark-awake" : "wordmark-breathe"}`}
+          style={{ letterSpacing: "0.18em" }}
         >
-          <span className="relative z-10">00bit</span>
+          00bit
         </a>
         <div className="flex items-center gap-8">
           <div className="hidden md:flex items-center gap-7">
