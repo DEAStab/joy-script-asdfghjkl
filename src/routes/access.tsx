@@ -11,19 +11,37 @@ export const Route = createFileRoute("/access")({
   component: AccessPage,
 });
 
+type Status = "idle" | "sending" | "sent" | "error";
+
 function AccessPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent("PreCog access request");
-    const body = encodeURIComponent(`From: ${email}\n\n${message}`);
-    // Routed to the 00bit team mailbox (hidden from the page)
-    window.location.href = `mailto:avivstabinsky@gmail.com?subject=${subject}&body=${body}`;
-    setSent(true);
+    setStatus("sending");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to send");
+      }
+      setStatus("sent");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Failed to send");
+    }
   };
+
 
   return (
     <main className="bg-base text-ink min-h-screen px-6 md:px-10 py-16">
