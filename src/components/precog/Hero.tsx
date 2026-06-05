@@ -56,7 +56,7 @@ export function Hero() {
             className="mt-10 flex flex-wrap items-center gap-6"
           >
             <a
-              href="#access"
+              href="/access"
               className="font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 py-3.5 hover:-translate-y-px transition-transform duration-200"
             >
               Request Access

@@ -51,7 +51,7 @@ export function Nav() {
             ))}
           </div>
           <a
-            href="#access"
+            href="/access"
             className="font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-4 py-2.5 hover:-translate-y-px transition-transform duration-200"
           >
             Request Access
