@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AccessRouteImport } from './routes/access'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 
 const AccessRoute = AccessRouteImport.update({
   id: '/access',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/access'
+  fullPaths: '/' | '/access' | '/api/public/contact'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/access'
-  id: '__root__' | '/' | '/access'
+  to: '/' | '/access' | '/api/public/contact'
+  id: '__root__' | '/' | '/access' | '/api/public/contact'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccessRoute: typeof AccessRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,13 +75,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccessRoute: AccessRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
