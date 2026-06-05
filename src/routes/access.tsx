@@ -100,13 +100,19 @@ function AccessPage() {
           <div className="flex items-center gap-6">
             <button
               type="submit"
-              className="font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 py-3.5 hover:-translate-y-px transition-transform duration-200"
+              disabled={status === "sending"}
+              className="font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 py-3.5 hover:-translate-y-px transition-transform duration-200 disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              Send message
+              {status === "sending" ? "Sending…" : "Send message"}
             </button>
-            {sent && (
+            {status === "sent" && (
               <span className="font-mono-ui text-[10px] uppercase tracking-[0.28em] text-cobalt">
-                ● handed off to your mail client
+                ● message delivered
+              </span>
+            )}
+            {status === "error" && (
+              <span className="font-mono-ui text-[10px] uppercase tracking-[0.28em] text-red-600">
+                ● {errorMsg}
               </span>
             )}
           </div>
