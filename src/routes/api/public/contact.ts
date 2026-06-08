@@ -64,6 +64,12 @@ export const Route = createFileRoute("/api/public/contact")({
         if (!res.ok) {
           const detail = await res.text();
           console.error("Resend send failed", res.status, detail);
+          if (res.status === 403 && detail.includes("verify a domain")) {
+            return Response.json(
+              { error: "Sender domain needs verification before messages can be sent" },
+              { status: 502 },
+            );
+          }
           return Response.json(
             { error: "Failed to send message" },
             { status: 502 },
