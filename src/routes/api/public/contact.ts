@@ -8,7 +8,8 @@ const ContactSchema = z.object({
 });
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const TO_ADDRESS = "aviv.stabinsky@duke.edu";
+const TO_ADDRESS = "reply@00bit.io";
+const FROM_ADDRESS = "Form Submission <reply@00bit.io>";
 
 export const Route = createFileRoute("/api/public/contact")({
   server: {
