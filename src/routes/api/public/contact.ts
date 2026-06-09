@@ -10,6 +10,28 @@ const ContactSchema = z.object({
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const TO_ADDRESS = "reply@00bit.io";
 const FROM_ADDRESS = "Form Submission <reply@00bit.io>";
+const ACCEPTED_RESEND_KEYS = ["RESEND_API_KEY", "RESEND_API_KEY_2"] as const;
+
+function getEmailEnvironmentDiagnostics() {
+  const resendKey = ACCEPTED_RESEND_KEYS.find((key) => Boolean(process.env[key]));
+  const relatedResendKeys = Object.keys(process.env)
+    .filter((key) => key.toUpperCase().includes("RESEND"))
+    .sort();
+  const missingEnvironmentVariables = [
+    ...(!process.env.LOVABLE_API_KEY ? ["LOVABLE_API_KEY"] : []),
+    ...(!resendKey ? ["RESEND_API_KEY or RESEND_API_KEY_2"] : []),
+  ];
+
+  return {
+    resendApiKey: resendKey ? process.env[resendKey] : undefined,
+    missingEnvironmentVariables,
+    expectedResendEnvironmentVariables: ACCEPTED_RESEND_KEYS,
+    detectedResendEnvironmentVariables: relatedResendKeys,
+    possibleMisnamedResendEnvironmentVariables: relatedResendKeys.filter(
+      (key) => !ACCEPTED_RESEND_KEYS.includes(key as (typeof ACCEPTED_RESEND_KEYS)[number]),
+    ),
+  };
+}
 
 export const Route = createFileRoute("/api/public/contact")({
   server: {
@@ -29,9 +51,26 @@ export const Route = createFileRoute("/api/public/contact")({
         const { email, message } = parsed.data;
 
         const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
-        const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.RESEND_API_KEY_2;
+        const diagnostics = getEmailEnvironmentDiagnostics();
+        const RESEND_API_KEY = diagnostics.resendApiKey;
         if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
-          return Response.json({ error: "Email not configured" }, { status: 500 });
+          console.error("Contact email environment validation failed", {
+            missingEnvironmentVariables: diagnostics.missingEnvironmentVariables,
+            detectedResendEnvironmentVariables: diagnostics.detectedResendEnvironmentVariables,
+            possibleMisnamedResendEnvironmentVariables: diagnostics.possibleMisnamedResendEnvironmentVariables,
+          });
+
+          return Response.json(
+            {
+              error: "Email environment is not configured correctly",
+              missingEnvironmentVariables: diagnostics.missingEnvironmentVariables,
+              expectedResendEnvironmentVariables: diagnostics.expectedResendEnvironmentVariables,
+              detectedResendEnvironmentVariables: diagnostics.detectedResendEnvironmentVariables,
+              possibleMisnamedResendEnvironmentVariables: diagnostics.possibleMisnamedResendEnvironmentVariables,
+              note: "Secret values are intentionally hidden. The Resend connector must expose RESEND_API_KEY, or a second linked Resend connector must expose RESEND_API_KEY_2.",
+            },
+            { status: 500 },
+          );
         }
 
         const escape = (s: string) =>
