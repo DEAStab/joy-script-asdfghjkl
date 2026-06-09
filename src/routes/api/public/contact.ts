@@ -8,7 +8,8 @@ const ContactSchema = z.object({
 });
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const TO_ADDRESS = "aviv.stabinsky@duke.edu";
+const TO_ADDRESS = "reply@00bit.io";
+const FROM_ADDRESS = "Form Submission <reply@00bit.io>";
 
 export const Route = createFileRoute("/api/public/contact")({
   server: {
@@ -36,14 +37,19 @@ export const Route = createFileRoute("/api/public/contact")({
         const escape = (s: string) =>
           s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+        const submittedAt = new Date().toISOString();
+
         const html = `
           <div style="font-family:ui-monospace,Menlo,monospace;color:#0a0a0a;">
-            <p style="text-transform:uppercase;letter-spacing:0.24em;font-size:11px;color:#0047FF;margin:0 0 16px;">// 00bit / precog access request</p>
+            <p style="text-transform:uppercase;letter-spacing:0.24em;font-size:11px;color:#0047FF;margin:0 0 16px;">// new contact form message</p>
             <p style="margin:0 0 8px;"><strong>From:</strong> ${escape(email)}</p>
+            <p style="margin:0 0 8px;"><strong>Submitted:</strong> ${escape(submittedAt)}</p>
             <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
             <pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.6;margin:0;">${escape(message)}</pre>
           </div>
         `;
+
+        const text = `New Contact Form Message\n\nFrom: ${email}\nSubmitted: ${submittedAt}\n\n${message}\n`;
 
         const res = await fetch(`${GATEWAY_URL}/emails`, {
           method: "POST",
@@ -53,11 +59,12 @@ export const Route = createFileRoute("/api/public/contact")({
             "X-Connection-Api-Key": RESEND_API_KEY,
           },
           body: JSON.stringify({
-            from: "PreCog Access <onboarding@resend.dev>",
+            from: FROM_ADDRESS,
             to: [TO_ADDRESS],
             reply_to: email,
-            subject: `PreCog access request from ${email}`,
+            subject: "New Contact Form Message",
             html,
+            text,
           }),
         });
 
