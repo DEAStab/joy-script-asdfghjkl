@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/public/contact")({
         const { email, message } = parsed.data;
 
         const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
-        const RESEND_API_KEY = process.env.RESEND_API_KEY;
+        const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.RESEND_API_KEY_2;
         if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
           return Response.json({ error: "Email not configured" }, { status: 500 });
         }
