@@ -13,6 +13,33 @@ export const Route = createFileRoute("/access")({
 
 type Status = "idle" | "sending" | "sent" | "error";
 
+type ContactErrorResponse = {
+  error?: string;
+  missingEnvironmentVariables?: string[];
+  expectedResendEnvironmentVariables?: readonly string[];
+  detectedResendEnvironmentVariables?: string[];
+  possibleMisnamedResendEnvironmentVariables?: string[];
+  note?: string;
+};
+
+function formatContactError(data: ContactErrorResponse) {
+  const details = [
+    data.error,
+    data.missingEnvironmentVariables?.length
+      ? `Missing: ${data.missingEnvironmentVariables.join(", ")}`
+      : undefined,
+    data.detectedResendEnvironmentVariables?.length
+      ? `Detected Resend vars: ${data.detectedResendEnvironmentVariables.join(", ")}`
+      : "Detected Resend vars: none",
+    data.possibleMisnamedResendEnvironmentVariables?.length
+      ? `Possible misnamed vars: ${data.possibleMisnamedResendEnvironmentVariables.join(", ")}`
+      : undefined,
+    data.note,
+  ].filter(Boolean);
+
+  return details.join(" — ") || "Failed to send";
+}
+
 function AccessPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -30,8 +57,8 @@ function AccessPage() {
         body: JSON.stringify({ email, message }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to send");
+        const data = await res.json().catch(() => ({} as ContactErrorResponse));
+        throw new Error(formatContactError(data));
       }
       setStatus("sent");
       setEmail("");
