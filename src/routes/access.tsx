@@ -7,7 +7,7 @@ export const Route = createFileRoute("/access")({
       { title: "Request Access — 00bit / PreCog" },
       {
         name: "description",
-        content: "Send a message to the 00bit team to request access to PreCog.",
+        content: "Open a secure channel to the 00bit team and request access to PreCog.",
       },
     ],
   }),
@@ -78,51 +78,50 @@ function AccessPage() {
   };
 
   return (
-    <main className="bg-base text-ink min-h-screen px-6 md:px-10 py-16">
-      <div className="max-w-[640px] mx-auto">
+    <main className="bg-base text-ink min-h-screen px-5 md:px-10 py-14 grid-bg">
+      <div className="scanlines fixed inset-0 z-[80] pointer-events-none" aria-hidden="true" />
+      <div className="max-w-[680px] mx-auto relative">
         <Link
           to="/"
-          className="link-rule font-mono-ui text-[11px] uppercase tracking-[0.24em] text-ink-soft hover:text-cobalt transition-colors"
+          className="link-rule font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-cobalt transition-colors"
         >
-          ← Back
+          ◂ return to console
         </Link>
 
-        <span className="block mt-10 font-mono-ui text-[11px] tracking-[0.28em] text-cobalt uppercase">
-          // 00bit / request access
-        </span>
+        <div className="mt-10 flex items-center gap-3 font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
+          <span className="inline-block w-5 h-px bg-cobalt" />
+          00bit // secure channel
+        </div>
 
         <h1
-          className="font-display text-ink mt-6 leading-[1.05] tracking-[-0.02em] [text-wrap:balance]"
-          style={{ fontSize: "clamp(40px, 5vw, 64px)" }}
+          className="font-display font-bold text-ink mt-6 leading-[1.0] tracking-[-0.03em] uppercase [text-wrap:balance]"
+          style={{ fontSize: "clamp(38px, 5.4vw, 68px)" }}
         >
-          Message the{" "}
-          <span className="font-mono-ui not-italic text-cobalt tracking-[-0.01em]">00bit</span>{" "}
-          team.
+          Open a channel to <span className="text-cobalt">00bit</span>.
         </h1>
 
-        <p className="font-body text-ink-soft mt-6 text-[16px] leading-relaxed">
-          Tell us who you are and why you want access. We read every message.
+        <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[52ch]">
+          Tell us who you are and what you investigate. Access is granted per desk — a human reads
+          every transmission.
         </p>
 
         {status === "sent" ? (
           <section
             aria-live="polite"
-            className="panel-rise mt-12 border border-ink bg-surface p-8 md:p-10"
+            className="panel-rise hud-frame mt-12 border border-muted-line bg-surface p-8 md:p-10"
           >
-            <div className="font-mono-ui text-[10px] uppercase tracking-[0.3em] text-cobalt">
-              ● message delivered
+            <div className="font-mono-ui text-[9px] uppercase tracking-[0.32em] text-signal">
+              ● transmission delivered
             </div>
             <h2
-              className="font-display italic text-ink mt-4 leading-[1.15]"
+              className="font-display font-medium text-ink mt-4 leading-[1.1]"
               style={{ fontSize: "clamp(26px, 3vw, 36px)" }}
             >
               Your message is in the queue.
             </h2>
-            <p className="font-body text-ink-soft mt-4 text-[15px] leading-relaxed">
-              It landed in the 00bit inbox a moment ago. A human reads every request — expect a
-              reply from{" "}
-              <span className="font-mono-ui text-[13px] normal-case">reply@00bit.io</span> within a
-              day or two.
+            <p className="text-ink-soft mt-4 text-[15px] leading-relaxed">
+              It landed in the 00bit inbox a moment ago. Expect a reply from{" "}
+              <span className="font-mono-ui text-[13px]">reply@00bit.io</span> within a day or two.
             </p>
             <div className="mt-6 pt-5 border-t border-muted-line font-mono-ui text-[11px] tracking-[0.12em] text-ink-soft">
               from: {email.trim()}
@@ -130,9 +129,9 @@ function AccessPage() {
             <button
               type="button"
               onClick={reset}
-              className="link-rule mt-7 font-mono-ui text-[11px] uppercase tracking-[0.24em] text-ink-soft hover:text-cobalt transition-colors"
+              className="link-rule mt-7 font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-cobalt transition-colors"
             >
-              Send another message
+              Send another transmission
             </button>
           </section>
         ) : (
@@ -140,98 +139,111 @@ function AccessPage() {
             onSubmit={onSubmit}
             noValidate
             onAnimationEnd={() => setShaking(false)}
-            className={`mt-12 flex flex-col gap-8 ${shaking ? "form-shake" : ""}`}
+            className={`hud-frame mt-12 border border-muted-line bg-surface ${shaking ? "form-shake" : ""}`}
           >
-            <label className="group flex flex-col gap-3">
-              <span className="font-mono-ui text-[10px] uppercase tracking-[0.3em] text-ink-soft group-focus-within:text-cobalt transition-colors">
-                Your email
+            <div className="flex items-center justify-between px-5 py-3 border-b border-muted-line">
+              <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
+                channel.request
               </span>
-              <input
-                type="email"
-                required
-                value={email}
-                aria-invalid={emailInvalid}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={() => setEmailTouched(true)}
-                placeholder="you@domain.com"
-                autoComplete="email"
-                className={`bg-transparent border-b outline-none py-3 font-body text-ink text-[16px] placeholder:text-ink-soft/50 transition-colors ${
-                  emailInvalid ? "border-[#C53030]" : "border-muted-line focus:border-cobalt"
-                }`}
-              />
-              {emailInvalid && (
-                <span className="font-mono-ui text-[10px] uppercase tracking-[0.2em] text-[#C53030]">
-                  Enter a valid email address
-                </span>
-              )}
-            </label>
-
-            <label className="group flex flex-col gap-3">
-              <span className="flex items-baseline justify-between font-mono-ui text-[10px] uppercase tracking-[0.3em] text-ink-soft group-focus-within:text-cobalt transition-colors">
-                Message
-                <span
-                  className={`tracking-[0.12em] tabular-nums transition-colors ${
-                    nearLimit ? "text-[#C53030]" : "text-muted-line"
-                  }`}
-                >
-                  {message.length.toLocaleString()} / {MAX_MESSAGE.toLocaleString()}
-                </span>
+              <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-cobalt">
+                ● encrypted in transit
               </span>
-              <textarea
-                required
-                rows={6}
-                maxLength={MAX_MESSAGE}
-                value={message}
-                aria-invalid={messageInvalid}
-                onChange={(e) => setMessage(e.target.value)}
-                onBlur={() => setMessageTouched(true)}
-                placeholder="What are you trying to investigate?"
-                className={`bg-surface border outline-none p-4 font-body text-ink text-[15px] placeholder:text-ink-soft/50 transition-colors resize-y ${
-                  messageInvalid ? "border-[#C53030]" : "border-muted-line focus:border-cobalt"
-                }`}
-              />
-              {messageInvalid && (
-                <span className="font-mono-ui text-[10px] uppercase tracking-[0.2em] text-[#C53030]">
-                  A message is required
-                </span>
-              )}
-            </label>
-
-            {/* honeypot: offscreen for humans, filled by bots, dropped by the server */}
-            <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
-              <label htmlFor="company">Company</label>
-              <input
-                id="company"
-                type="text"
-                tabIndex={-1}
-                autoComplete="off"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-              />
             </div>
 
-            <div className="flex items-center gap-6 flex-wrap">
-              <button
-                type="submit"
-                disabled={status === "sending"}
-                className="inline-flex items-center gap-3 font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 py-3.5 hover:-translate-y-px hover:bg-[var(--cobalt-press)] active:translate-y-0 transition-[transform,background-color,opacity] duration-200 disabled:opacity-55 disabled:hover:translate-y-0 disabled:cursor-default"
-              >
-                {status === "sending" && (
-                  <span
-                    aria-hidden="true"
-                    className="inline-block w-3 h-3 border-2 border-white/35 border-t-white animate-spin"
-                  />
-                )}
-                {status === "sending" ? "Transmitting…" : "Send message"}
-              </button>
-              {status === "error" && (
-                <span
-                  role="alert"
-                  className="font-mono-ui text-[10px] uppercase tracking-[0.28em] text-[#C53030]"
-                >
-                  ● {errorMsg}
+            <div className="p-6 md:p-8 flex flex-col gap-8">
+              <label className="group flex flex-col gap-3">
+                <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft group-focus-within:text-cobalt transition-colors">
+                  reply-to address
                 </span>
-              )}
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  aria-invalid={emailInvalid}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => setEmailTouched(true)}
+                  placeholder="you@domain.com"
+                  autoComplete="email"
+                  className={`bg-transparent border-b outline-none py-3 font-mono-ui text-ink text-[14px] placeholder:text-ink-soft/40 transition-colors ${
+                    emailInvalid
+                      ? "border-[var(--threat)]"
+                      : "border-muted-line focus:border-cobalt"
+                  }`}
+                />
+                {emailInvalid && (
+                  <span className="font-mono-ui text-[9px] uppercase tracking-[0.22em] text-threat">
+                    enter a valid email address
+                  </span>
+                )}
+              </label>
+
+              <label className="group flex flex-col gap-3">
+                <span className="flex items-baseline justify-between font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft group-focus-within:text-cobalt transition-colors">
+                  transmission
+                  <span
+                    className={`tracking-[0.12em] tabular-nums transition-colors ${nearLimit ? "text-threat" : "text-ink-soft/50"}`}
+                  >
+                    {message.length.toLocaleString()} / {MAX_MESSAGE.toLocaleString()}
+                  </span>
+                </span>
+                <textarea
+                  required
+                  rows={6}
+                  maxLength={MAX_MESSAGE}
+                  value={message}
+                  aria-invalid={messageInvalid}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onBlur={() => setMessageTouched(true)}
+                  placeholder="What are you trying to investigate?"
+                  className={`bg-base border outline-none p-4 font-mono-ui text-ink text-[13px] leading-relaxed placeholder:text-ink-soft/40 transition-colors resize-y ${
+                    messageInvalid
+                      ? "border-[var(--threat)]"
+                      : "border-muted-line focus:border-cobalt"
+                  }`}
+                />
+                {messageInvalid && (
+                  <span className="font-mono-ui text-[9px] uppercase tracking-[0.22em] text-threat">
+                    a message is required
+                  </span>
+                )}
+              </label>
+
+              {/* honeypot: offscreen for humans, filled by bots, dropped by the server */}
+              <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                <label htmlFor="company">Company</label>
+                <input
+                  id="company"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center gap-6 flex-wrap">
+                <button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="inline-flex items-center gap-3 font-mono-ui text-[10px] uppercase tracking-[0.28em] bg-cobalt text-white px-6 py-4 hover:bg-[var(--cobalt-press)] hover:-translate-y-px active:translate-y-0 transition-[transform,background-color,opacity] duration-200 disabled:opacity-55 disabled:hover:translate-y-0 disabled:cursor-default"
+                >
+                  {status === "sending" && (
+                    <span
+                      aria-hidden="true"
+                      className="inline-block w-3 h-3 border-2 border-white/35 border-t-white animate-spin"
+                    />
+                  )}
+                  {status === "sending" ? "transmitting…" : "transmit"}
+                </button>
+                {status === "error" && (
+                  <span
+                    role="alert"
+                    className="font-mono-ui text-[9px] uppercase tracking-[0.28em] text-threat"
+                  >
+                    ● {errorMsg}
+                  </span>
+                )}
+              </div>
             </div>
           </form>
         )}
