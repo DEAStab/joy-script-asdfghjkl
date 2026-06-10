@@ -78,8 +78,9 @@ export const Route = createFileRoute("/api/public/contact")({
           });
         } catch (err) {
           console.error("Resend request failed to reach the API", err);
+          // TEMP DEBUG: surface the real reason on the form.
           return Response.json(
-            { error: "We couldn’t send your message right now. Please try again shortly." },
+            { error: `Network error reaching Resend: ${err instanceof Error ? err.message : String(err)}` },
             { status: 502 },
           );
         }
@@ -87,8 +88,9 @@ export const Route = createFileRoute("/api/public/contact")({
         if (!res.ok) {
           const detail = await res.text().catch(() => "");
           console.error("Resend send failed", res.status, detail);
+          // TEMP DEBUG: surface the real reason on the form.
           return Response.json(
-            { error: "We couldn’t send your message right now. Please try again shortly." },
+            { error: `Resend rejected the send (${res.status}): ${detail.slice(0, 400)}` },
             { status: 502 },
           );
         }
