@@ -350,12 +350,13 @@ function Schematic({
         ].map((e, i) => (
           <g key={i}>
             <motion.path
-              d={`M ${e.from.x} ${e.from.y + 6} L ${e.to.x} ${e.to.y - 4}`}
+              d={`M ${e.from.x} ${e.from.y} L ${e.to.x} ${e.to.y}`}
               stroke={e.hot ? BAD : SOFT}
               strokeWidth={e.hot ? "1" : "0.7"}
               fill="none"
               style={{ pathLength: pPedi }}
             />
+
             {e.label && (
               <motion.text
                 x={(e.from.x + e.to.x) / 2 + 6}
