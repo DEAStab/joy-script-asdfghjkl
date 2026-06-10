@@ -8,7 +8,8 @@ export function NodeGraph() {
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    const W = 600, H = 600;
+    const W = 600,
+      H = 600;
     const count = 18;
     const nodes: Node[] = Array.from({ length: count }, (_, i) => ({
       x: Math.random() * W,
@@ -32,9 +33,32 @@ export function NodeGraph() {
           }" />` +
           (n.highlight
             ? `<circle data-pulse cx="${n.x}" cy="${n.y}" r="10" fill="none" stroke="#0047FF" stroke-width="1" opacity="0.4" />`
-            : "")
+            : ""),
       )
       .join("");
+
+    const drawLines = () => {
+      let lines = "";
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const d = Math.hypot(dx, dy);
+          if (d < 160) {
+            const op = (1 - d / 160) * 0.5;
+            const stroke = nodes[i].highlight || nodes[j].highlight ? "#0047FF" : "#0E0E0E";
+            lines += `<line x1="${nodes[i].x}" y1="${nodes[i].y}" x2="${nodes[j].x}" y2="${nodes[j].y}" stroke="${stroke}" stroke-width="0.6" opacity="${op}" />`;
+          }
+        }
+      }
+      linesGroup.innerHTML = lines;
+    };
+
+    // reduced motion: render one static frame, no animation loop
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      drawLines();
+      return;
+    }
 
     let t = 0;
     const tick = () => {
@@ -61,22 +85,7 @@ export function NodeGraph() {
         pulse.setAttribute("r", String(r));
         pulse.setAttribute("opacity", String(0.5 - (r - 8) / 40));
       }
-      // rebuild lines
-      let lines = "";
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const d = Math.hypot(dx, dy);
-          if (d < 160) {
-            const op = (1 - d / 160) * 0.5;
-            const stroke =
-              nodes[i].highlight || nodes[j].highlight ? "#0047FF" : "#0E0E0E";
-            lines += `<line x1="${nodes[i].x}" y1="${nodes[i].y}" x2="${nodes[j].x}" y2="${nodes[j].y}" stroke="${stroke}" stroke-width="0.6" opacity="${op}" />`;
-          }
-        }
-      }
-      linesGroup.innerHTML = lines;
+      drawLines();
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -92,7 +101,13 @@ export function NodeGraph() {
     >
       <defs>
         <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#C8C8C8" strokeWidth="0.3" opacity="0.4" />
+          <path
+            d="M 40 0 L 0 0 0 40"
+            fill="none"
+            stroke="#C8C8C8"
+            strokeWidth="0.3"
+            opacity="0.4"
+          />
         </pattern>
       </defs>
       <rect width="600" height="600" fill="url(#grid)" />

@@ -21,7 +21,7 @@ export function Metrics() {
       (entries) => {
         for (const e of entries) if (e.isIntersecting) setActive(true);
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
     obs.observe(ref.current);
     return () => obs.disconnect();
@@ -57,6 +57,10 @@ function Stat({
 
   useEffect(() => {
     if (!active) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setCurrent(value);
+      return;
+    }
     const duration = 1600;
     const start = performance.now();
     let raf = 0;
@@ -72,7 +76,10 @@ function Stat({
 
   return (
     <div className="flex flex-col">
-      <div className="font-display text-ink leading-none" style={{ fontSize: "clamp(40px, 4.5vw, 64px)" }}>
+      <div
+        className="font-display text-ink leading-none tabular-nums"
+        style={{ fontSize: "clamp(40px, 4.5vw, 64px)" }}
+      >
         {prefix}
         {formatNumber(current, format)}
         {suffix}

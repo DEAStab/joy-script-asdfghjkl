@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Nav } from "@/components/precog/Nav";
-import { Hero } from "@/components/precog/Hero";
-import { ScrollAnatomy } from "@/components/precog/ScrollAnatomy";
-import { Features } from "@/components/precog/Features";
-import { Algorithm } from "@/components/precog/Algorithm";
-import { Metrics } from "@/components/precog/Metrics";
-import { Footer } from "@/components/precog/Footer";
+import { CursorReticle } from "@/components/v2/CursorReticle";
+import { NavV2 } from "@/components/v2/NavV2";
+import { HeroV2 } from "@/components/v2/HeroV2";
+import { LiveFeed } from "@/components/v2/LiveFeed";
+import { ModulesDeck } from "@/components/v2/ModulesDeck";
+import { TraceDemo } from "@/components/v2/TraceDemo";
+import { Doctrine } from "@/components/v2/Doctrine";
+import { CtaSection } from "@/components/v2/CtaSection";
+import { FooterV2 } from "@/components/v2/FooterV2";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,8 +21,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "PreCog — Blockchain intelligence by 00bit" },
       {
         property: "og:description",
-        content:
-          "Detect the signal before the noise becomes the story. Multi-chain risk scoring with auditable evidence.",
+        content: "See it before it happens. Multi-chain risk scoring with auditable evidence.",
       },
     ],
   }),
@@ -29,14 +30,17 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <main className="bg-base text-ink">
-      <Nav />
-      <Hero />
-      <ScrollAnatomy />
-      <Features />
-      <Algorithm />
-      <Metrics />
-      <Footer />
+    <main className="bg-base text-ink relative">
+      <CursorReticle />
+      <div className="scanlines fixed inset-0 z-[80]" aria-hidden="true" />
+      <NavV2 />
+      <HeroV2 />
+      <LiveFeed />
+      <ModulesDeck />
+      <TraceDemo />
+      <Doctrine />
+      <CtaSection />
+      <FooterV2 />
     </main>
   );
 }
