@@ -12,7 +12,7 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 const TO_ADDRESSES = ["avivstabinsky@gmail.com", "reply@00bit.io"];
 // Sender must be on a domain verified in Resend (00bit.io).
 const FROM_ADDRESS = "00bit Request Access <reply@00bit.io>";
-const RESEND_TIMEOUT_MS = 4000;
+const RESEND_TIMEOUT_MS = 10000;
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -49,10 +49,6 @@ export const Route = createFileRoute("/api/public/contact")({
               { status: 503 },
             );
           }
-
-          // TEMP DEBUG: safe fingerprint of the key the Worker actually received
-          // (length + last 4 chars only — never the full secret).
-          const keyFingerprint = `len=${apiKey.length} tail=…${apiKey.slice(-4)}`;
 
           const submittedAt = new Date().toISOString();
 
@@ -91,36 +87,31 @@ export const Route = createFileRoute("/api/public/contact")({
               signal: controller.signal,
             });
           } catch (err) {
-            const reason = controller.signal.aborted
-              ? `timed out after ${RESEND_TIMEOUT_MS}ms (the request to Resend is hanging)`
-              : err instanceof Error
-                ? `${err.name}: ${err.message}`
-                : String(err);
-            console.error("Resend request failed to reach the API", reason);
-            // TEMP DEBUG: surface the real reason on the form.
-            return Response.json({ error: `Could not reach Resend — ${reason}` }, { status: 502 });
+            console.error("Resend request failed to reach the API", err);
+            return Response.json(
+              { error: "We couldn’t send your message right now. Please try again shortly." },
+              { status: 502 },
+            );
           } finally {
             clearTimeout(timeout);
           }
 
           if (!res.ok) {
             const detail = await res.text().catch(() => "");
-            console.error("Resend send failed", res.status, detail, keyFingerprint);
-            // TEMP DEBUG: surface the real reason + key fingerprint on the form.
+            console.error("Resend send failed", res.status, detail);
             return Response.json(
-              {
-                error: `Resend rejected the send (${res.status}) [worker key ${keyFingerprint}]: ${detail.slice(0, 300)}`,
-              },
+              { error: "We couldn’t send your message right now. Please try again shortly." },
               { status: 502 },
             );
           }
 
           return Response.json({ ok: true });
         } catch (err) {
-          const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-          console.error("Contact handler crashed", reason);
-          // TEMP DEBUG: surface the real reason on the form.
-          return Response.json({ error: `Server error — ${reason}` }, { status: 500 });
+          console.error("Contact handler crashed", err);
+          return Response.json(
+            { error: "Something went wrong on our end. Please try again shortly." },
+            { status: 500 },
+          );
         }
       },
     },
