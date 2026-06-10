@@ -50,6 +50,10 @@ export const Route = createFileRoute("/api/public/contact")({
             );
           }
 
+          // TEMP DEBUG: safe fingerprint of the key the Worker actually received
+          // (length + last 4 chars only — never the full secret).
+          const keyFingerprint = `len=${apiKey.length} tail=…${apiKey.slice(-4)}`;
+
           const submittedAt = new Date().toISOString();
 
           const html = `
@@ -101,10 +105,12 @@ export const Route = createFileRoute("/api/public/contact")({
 
           if (!res.ok) {
             const detail = await res.text().catch(() => "");
-            console.error("Resend send failed", res.status, detail);
-            // TEMP DEBUG: surface the real reason on the form.
+            console.error("Resend send failed", res.status, detail, keyFingerprint);
+            // TEMP DEBUG: surface the real reason + key fingerprint on the form.
             return Response.json(
-              { error: `Resend rejected the send (${res.status}): ${detail.slice(0, 400)}` },
+              {
+                error: `Resend rejected the send (${res.status}) [worker key ${keyFingerprint}]: ${detail.slice(0, 300)}`,
+              },
               { status: 502 },
             );
           }
