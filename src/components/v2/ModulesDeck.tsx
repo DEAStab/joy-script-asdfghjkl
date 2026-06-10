@@ -1,61 +1,6 @@
 import type { ReactNode } from "react";
 import { NetworkCanvas } from "./NetworkCanvas";
-
-function TangoViz() {
-  // cadence waveform with one anomaly spike + scanning beam
-  const pts: string[] = [];
-  for (let x = 0; x <= 560; x += 8) {
-    const base = 90 + Math.sin(x / 36) * 14 + Math.sin(x / 13) * 6;
-    const spike = x > 330 && x < 360 ? -52 * Math.exp(-((x - 345) ** 2) / 120) : 0;
-    pts.push(`${x},${(base + spike).toFixed(1)}`);
-  }
-  return (
-    <svg
-      viewBox="0 0 560 180"
-      className="w-full h-full"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <polyline points={pts.join(" ")} fill="none" stroke="var(--cobalt)" strokeWidth="1.4" />
-      <circle cx="345" cy="44" r="4" fill="var(--threat)" />
-      <circle
-        cx="345"
-        cy="44"
-        r="10"
-        fill="none"
-        stroke="var(--threat)"
-        strokeWidth="1"
-        className="threat-ring"
-      />
-      <text x="358" y="40" fontSize="10" fill="var(--threat)" fontFamily="IBM Plex Mono, monospace">
-        fan-out burst
-      </text>
-      <g className="scan-beam">
-        <line
-          x1="0"
-          y1="0"
-          x2="0"
-          y2="180"
-          stroke="var(--cobalt)"
-          strokeOpacity="0.5"
-          strokeWidth="1"
-        />
-      </g>
-      <line
-        x1="0"
-        y1="160"
-        x2="560"
-        y2="160"
-        stroke="var(--ink-soft)"
-        strokeOpacity="0.35"
-        strokeWidth="0.5"
-      />
-      <text x="4" y="174" fontSize="9" fill="var(--ink-soft)" fontFamily="IBM Plex Mono, monospace">
-        tx cadence · 24h window
-      </text>
-    </svg>
-  );
-}
+import { TangoCanvas } from "./TangoCanvas";
 
 function PedigridViz() {
   const nodes = [
@@ -158,7 +103,7 @@ const MODULES: {
     title: "Reads the rhythm of the chain.",
     body: "Real-time detection of fan-out, peel-chain laundering, dormancy bursts and timing anomalies. Tango listens to the cadence of every transaction and flags the ones that lie.",
     stat: "fan-out · dormancy · peel-chain",
-    viz: <TangoViz />,
+    viz: <TangoCanvas />,
   },
   {
     index: "γ",
