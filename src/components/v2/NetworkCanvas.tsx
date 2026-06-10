@@ -59,8 +59,8 @@ export function NetworkCanvas({
       nodes = Array.from({ length: count }, () => ({
         x: Math.random() * W,
         y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
+        vx: (Math.random() - 0.5) * 0.13,
+        vy: (Math.random() - 0.5) * 0.13,
         r: Math.random() < 0.08 ? 2.4 : 1.2,
         hot: Math.random() < 0.05,
       }));
@@ -133,18 +133,18 @@ export function NetworkCanvas({
         const dy = mouse.y - n.y;
         const d = Math.hypot(dx, dy);
         if (d < 220 && d > 1) {
-          n.vx += (dx / d) * 0.004;
-          n.vy += (dy / d) * 0.004;
+          n.vx += (dx / d) * 0.0024;
+          n.vy += (dy / d) * 0.0024;
         }
-        n.vx = Math.max(-0.35, Math.min(0.35, n.vx));
-        n.vy = Math.max(-0.35, Math.min(0.35, n.vy));
+        n.vx = Math.max(-0.21, Math.min(0.21, n.vx));
+        n.vy = Math.max(-0.21, Math.min(0.21, n.vy));
         n.x += n.vx;
         n.y += n.vy;
         if (n.x < 0 || n.x > W) n.vx *= -1;
         if (n.y < 0 || n.y > H) n.vy *= -1;
       }
       // spawn a pulse along a random short edge
-      if (now - lastPulse > 420 && nodes.length > 2) {
+      if (now - lastPulse > 900 && nodes.length > 2) {
         lastPulse = now;
         for (let attempt = 0; attempt < 8; attempt++) {
           const a = Math.floor(Math.random() * nodes.length);

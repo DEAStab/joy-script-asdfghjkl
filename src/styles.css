@@ -52,7 +52,6 @@
   --cobalt: #0b46e6; /* deeper cobalt for AA contrast on light */
   --cobalt-fill: #0047ff; /* brand cobalt for solid fills */
   --cobalt-press: #0036c4;
-  --cobalt-rgb: 11, 70, 230;
   --signal: #0a8f55; /* darker green, legible on light */
   --threat: #d62828;
   --muted-line: rgba(11, 17, 32, 0.16);
@@ -61,7 +60,6 @@
   /* surfaces composed with alpha */
   --base-rgb: 233, 237, 244;
   --grid-line: rgba(11, 17, 32, 0.05);
-  --scanline: rgba(11, 17, 32, 0.018);
 
   /* network-canvas palette (comma rgb triplets) */
   --net-edge: 0, 71, 255;
@@ -103,7 +101,6 @@
   --cobalt: #4d7dff; /* readable electric cobalt on dark */
   --cobalt-fill: #0047ff;
   --cobalt-press: #0036c4;
-  --cobalt-rgb: 77, 125, 255;
   --signal: #3cf59a; /* system-online green */
   --threat: #ff5c5c; /* flagged red */
   --muted-line: rgba(232, 236, 244, 0.12);
@@ -111,7 +108,6 @@
 
   --base-rgb: 5, 7, 11;
   --grid-line: rgba(232, 236, 244, 0.035);
-  --scanline: rgba(232, 236, 244, 0.022);
 
   --net-edge: 77, 125, 255;
   --net-edge-threat: 255, 92, 92;
@@ -221,49 +217,6 @@ html.theme-transition *::after {
   background-size: 56px 56px;
 }
 
-/* ——— CRT scanlines, barely-there ——— */
-.scanlines {
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    var(--scanline) 0px,
-    var(--scanline) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-}
-
-/* ——— HUD corner brackets ——— */
-.hud-frame {
-  position: relative;
-}
-.hud-frame::before,
-.hud-frame::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 1px solid var(--cobalt);
-  opacity: 0.7;
-  transition: opacity 250ms;
-}
-.hud-frame::before {
-  top: -1px;
-  left: -1px;
-  border-right: none;
-  border-bottom: none;
-}
-.hud-frame::after {
-  bottom: -1px;
-  right: -1px;
-  border-left: none;
-  border-top: none;
-}
-.hud-frame:hover::before,
-.hud-frame:hover::after {
-  opacity: 1;
-}
-
 /* ——— underline reveal ——— */
 .link-rule {
   background-image: linear-gradient(currentColor, currentColor);
@@ -336,23 +289,6 @@ html.theme-transition *::after {
   animation: scan-x 4.5s linear infinite;
 }
 
-/* ——— hollow display type that fills on hover ——— */
-.type-hollow {
-  color: transparent;
-  -webkit-text-stroke: 1px var(--ink);
-}
-.type-hollow .type-fill {
-  position: absolute;
-  inset: 0;
-  color: var(--cobalt);
-  -webkit-text-stroke: 0;
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 600ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.type-hollow:hover .type-fill {
-  clip-path: inset(0 0 0 0);
-}
-
 /* ——— slashed zero for the 00bit wordmark ——— */
 .zero-slashed {
   position: relative;
@@ -368,24 +304,6 @@ html.theme-transition *::after {
   min-height: 1.5px;
   background: currentColor;
   transform: translate(-50%, -50%) rotate(-56deg);
-}
-
-/* ——— pointer accent ring (native cursor stays visible) ——— */
-.cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
-  border: 1.5px solid var(--cobalt);
-  border-radius: 50% !important;
-  box-shadow: 0 0 10px rgba(var(--cobalt-rgb), 0.45);
-  background: rgba(var(--cobalt-rgb), 0.06);
-  pointer-events: none;
-  z-index: 90;
-  opacity: 0;
-  will-change: transform, opacity;
 }
 
 @keyframes form-shake {
@@ -421,8 +339,7 @@ html.theme-transition *::after {
   .scan-beam {
     animation: none;
   }
-  .link-rule,
-  .type-hollow .type-fill {
+  .link-rule {
     transition: none;
   }
 }

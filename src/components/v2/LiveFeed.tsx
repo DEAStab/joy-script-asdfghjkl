@@ -72,7 +72,7 @@ export function LiveFeed() {
     const loop = () => {
       if (!live) return;
       setLines((prev) => [...prev.slice(-(MAX - 1)), makeLine(idRef.current++)]);
-      timer = setTimeout(loop, 1200 + Math.random() * 1600);
+      timer = setTimeout(loop, 2500 + Math.random() * 1500);
     };
     const io = new IntersectionObserver(([e]) => {
       live = e.isIntersecting;
@@ -91,14 +91,14 @@ export function LiveFeed() {
     <section id="feed" className="border-y border-muted-line">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-4">
-          <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            01 / live wire
+          <div className="font-body text-[12px] font-semibold uppercase tracking-[0.08em] text-cobalt">
+            01 — Live activity
           </div>
           <h2
             className="font-display font-medium text-ink mt-5 leading-[1.02] tracking-[-0.03em] [text-wrap:balance]"
             style={{ fontSize: "clamp(34px, 3.6vw, 56px)" }}
           >
-            The chain never sleeps. Neither does the watcher.
+            Every block, scored as it lands.
           </h2>
           <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[44ch]">
             Every block, on every indexed chain, scored as it lands. This is a live rendering of the
@@ -107,14 +107,14 @@ export function LiveFeed() {
         </div>
 
         <div ref={hostRef} className="lg:col-span-8">
-          <div className="hud-frame bg-surface border border-muted-line">
+          <div className="bg-surface border border-muted-line">
             <div className="flex items-center justify-between px-5 py-3 border-b border-muted-line">
-              <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-                detections.stream — illustrative
+              <span className="font-body text-[12px] font-medium tracking-[0.02em] text-ink-soft">
+                Detection stream — illustrative example
               </span>
-              <span className="flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[0.3em] text-signal">
+              <span className="flex items-center gap-2 font-body text-[12px] font-medium tracking-[0.02em] text-signal">
                 <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-                streaming
+                Live
               </span>
             </div>
             <div className="px-5 py-5 font-mono-ui text-[11px] md:text-[12px] leading-[2.2] min-h-[280px]">

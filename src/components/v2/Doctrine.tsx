@@ -5,8 +5,8 @@ export function Doctrine() {
     <section id="doctrine" className="border-b border-muted-line">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-6">
-          <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            04 / doctrine
+          <div className="font-body text-[12px] font-semibold uppercase tracking-[0.08em] text-cobalt">
+            04 — Methodology
           </div>
           <h2
             className="font-display font-medium text-ink mt-5 leading-[1.0] tracking-[-0.03em] [text-wrap:balance]"
@@ -21,7 +21,7 @@ export function Doctrine() {
           </p>
           <Link
             to="/access"
-            className="group link-rule inline-block mt-10 font-mono-ui text-[10px] uppercase tracking-[0.28em] text-cobalt hover:text-ink transition-colors"
+            className="group link-rule inline-block mt-10 font-body text-[13px] font-semibold tracking-[0.02em] text-cobalt hover:text-ink transition-colors"
           >
             Request the methodology{" "}
             <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
@@ -31,12 +31,14 @@ export function Doctrine() {
         </div>
 
         <div className="lg:col-span-6">
-          <div className="hud-frame bg-surface border border-muted-line p-6 md:p-8 font-mono-ui text-[12px] md:text-[13px] leading-[2] text-ink-soft">
+          <div className="bg-surface border border-muted-line p-6 md:p-8 font-mono-ui text-[12px] md:text-[13px] leading-[2] text-ink-soft">
             <div className="flex items-center justify-between mb-5 pb-4 border-b border-muted-line">
-              <span className="text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-                signal.output
+              <span className="font-body text-[12px] font-medium tracking-[0.02em] text-ink-soft">
+                Signal output
               </span>
-              <span className="text-[9px] uppercase tracking-[0.3em] text-signal">● verified</span>
+              <span className="font-body text-[12px] font-medium tracking-[0.02em] text-signal">
+                Verified
+              </span>
             </div>
             <pre className="whitespace-pre overflow-x-auto">
               {`{

@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CursorReticle } from "@/components/v2/CursorReticle";
 import { NavV2 } from "@/components/v2/NavV2";
 import { HeroV2 } from "@/components/v2/HeroV2";
 import { LiveFeed } from "@/components/v2/LiveFeed";
@@ -8,6 +7,7 @@ import { TraceDemo } from "@/components/v2/TraceDemo";
 import { Doctrine } from "@/components/v2/Doctrine";
 import { CtaSection } from "@/components/v2/CtaSection";
 import { FooterV2 } from "@/components/v2/FooterV2";
+import { StickyAccess } from "@/components/v2/StickyAccess";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,8 +31,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <main className="bg-base text-ink relative">
-      <CursorReticle />
-      <div className="scanlines fixed inset-0 z-[80]" aria-hidden="true" />
       <NavV2 />
       <HeroV2 />
       <LiveFeed />
@@ -41,6 +39,7 @@ function Index() {
       <Doctrine />
       <CtaSection />
       <FooterV2 />
+      <StickyAccess />
     </main>
   );
 }
