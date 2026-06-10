@@ -1,16 +1,25 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import { NodeGraph } from "./NodeGraph";
 
-const fade = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.1 + i * 0.1, duration: 0.6, ease: "easeOut" as const },
-  }),
-};
-
 export function Hero() {
+  const reduce = useReducedMotion();
+  const { scrollY } = useScroll();
+  const parallaxY = useTransform(scrollY, [0, 600], [0, -40]);
+
+  const fade = {
+    hidden: { opacity: 0, y: reduce ? 0 : 16 },
+    show: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: reduce ? 0 : 0.1 + i * 0.1,
+        duration: reduce ? 0 : 0.6,
+        ease: "easeOut" as const,
+      },
+    }),
+  };
+
   return (
     <section id="top" className="relative min-h-screen pt-24 pb-16 px-6 md:px-10">
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center min-h-[calc(100vh-6rem)]">
@@ -30,7 +39,7 @@ export function Hero() {
             initial="hidden"
             animate="show"
             variants={fade}
-            className="font-display text-ink mt-6 leading-[1.02] tracking-[-0.02em]"
+            className="font-display text-ink mt-6 leading-[1.02] tracking-[-0.02em] [text-wrap:balance]"
             style={{ fontSize: "clamp(52px, 7vw, 96px)" }}
           >
             Detect the <em className="italic text-cobalt">signal</em>.
@@ -45,7 +54,8 @@ export function Hero() {
             variants={fade}
             className="font-body text-ink-soft mt-8 text-[17px] leading-relaxed max-w-[52ch]"
           >
-            PreCog is the blockchain intelligence layer for analysts who refuse to wait for the headline.
+            PreCog is the blockchain intelligence layer for analysts who refuse to wait for the
+            headline.
           </motion.p>
 
           <motion.div
@@ -55,17 +65,20 @@ export function Hero() {
             variants={fade}
             className="mt-10 flex flex-wrap items-center gap-6"
           >
-            <a
-              href="/access"
-              className="font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 py-3.5 hover:-translate-y-px transition-transform duration-200"
+            <Link
+              to="/access"
+              className="font-mono-ui text-[11px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 py-3.5 hover:-translate-y-px hover:bg-[var(--cobalt-press)] active:translate-y-0 transition-[transform,background-color] duration-200"
             >
               Request Access
-            </a>
+            </Link>
             <a
-              href="docs/ALGORITHM.md"
-              className="font-mono-ui text-[11px] uppercase tracking-[0.24em] text-ink underline decoration-cobalt decoration-1 underline-offset-[6px] hover:text-cobalt transition-colors"
+              href="#algorithm"
+              className="group link-rule font-mono-ui text-[11px] uppercase tracking-[0.24em] text-ink hover:text-cobalt transition-colors"
             >
-              Read the Algorithm ↗
+              Read the Algorithm{" "}
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-px">
+                ↗
+              </span>
             </a>
           </motion.div>
 
@@ -84,7 +97,8 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
+          transition={{ delay: reduce ? 0 : 0.5, duration: reduce ? 0 : 0.8 }}
+          style={{ y: reduce ? 0 : parallaxY }}
           className="lg:col-span-5 relative aspect-square w-full bg-surface border border-muted-line"
         >
           <div className="absolute inset-0 p-4">

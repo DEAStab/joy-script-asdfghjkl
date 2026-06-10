@@ -77,18 +77,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Your Guidebook visualizes and unravels crypto mixer and bridge transactions in real-time." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Your Guidebook visualizes and unravels crypto mixer and bridge transactions in real-time." },
+      { title: "PreCog — Blockchain intelligence by 00bit" },
+      {
+        name: "description",
+        content:
+          "PreCog visualizes and unravels crypto mixer and bridge transactions in real time. Multi-chain risk scoring with auditable evidence.",
+      },
+      { name: "author", content: "00bit" },
+      { property: "og:title", content: "PreCog — Blockchain intelligence by 00bit" },
+      {
+        property: "og:description",
+        content:
+          "Detect the signal before the noise becomes the story. Multi-chain risk scoring with auditable evidence.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Your Guidebook visualizes and unravels crypto mixer and bridge transactions in real-time." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea223fec-eb7d-44a1-b53d-0235bd89d069/id-preview-ddab9b12--94392ac0-6672-45f6-8077-1b4276b1b664.lovable.app-1780597062858.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea223fec-eb7d-44a1-b53d-0235bd89d069/id-preview-ddab9b12--94392ac0-6672-45f6-8077-1b4276b1b664.lovable.app-1780597062858.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "PreCog — Blockchain intelligence by 00bit" },
+      {
+        name: "twitter:description",
+        content:
+          "Detect the signal before the noise becomes the story. Multi-chain risk scoring with auditable evidence.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea223fec-eb7d-44a1-b53d-0235bd89d069/id-preview-ddab9b12--94392ac0-6672-45f6-8077-1b4276b1b664.lovable.app-1780597062858.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea223fec-eb7d-44a1-b53d-0235bd89d069/id-preview-ddab9b12--94392ac0-6672-45f6-8077-1b4276b1b664.lovable.app-1780597062858.png",
+      },
     ],
     links: [
       {

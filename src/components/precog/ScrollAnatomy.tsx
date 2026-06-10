@@ -1,5 +1,12 @@
-import { motion, useScroll, useTransform, useSpring, MotionValue } from "framer-motion";
-import { useRef } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValueEvent,
+  MotionValue,
+} from "framer-motion";
+import { useRef, useState } from "react";
 
 const milestones = [
   {
@@ -46,27 +53,32 @@ export function ScrollAnatomy() {
   // Mixer: 0.15 - 0.35
   const pMixerNode = usePiece(p, 0.15, 0.22);
   const pMixerBranch1 = usePiece(p, 0.22, 0.27);
-  const pMixerBranch2 = usePiece(p, 0.24, 0.30);
+  const pMixerBranch2 = usePiece(p, 0.24, 0.3);
   const pMixerBranch3 = usePiece(p, 0.27, 0.33);
   // Bridge: 0.38 - 0.55
   const pBridgeBand = usePiece(p, 0.38, 0.45);
   const pBridgeCross = usePiece(p, 0.43, 0.55);
   // Pedigrid: 0.60 - 0.80
-  const pPedi = usePiece(p, 0.60, 0.78);
+  const pPedi = usePiece(p, 0.6, 0.78);
   // Verdict lines staggered 0.85 -> 1.0
   const pV1 = usePiece(p, 0.84, 0.88);
   const pV2 = usePiece(p, 0.87, 0.91);
-  const pV3 = usePiece(p, 0.90, 0.94);
+  const pV3 = usePiece(p, 0.9, 0.94);
   const pV4 = usePiece(p, 0.93, 0.97);
   const pV5 = usePiece(p, 0.96, 1.0);
 
   const activeIdx = useTransform(p, (v): number => {
     if (v < 0.15) return 0;
     if (v < 0.38) return 1;
-    if (v < 0.60) return 2;
+    if (v < 0.6) return 2;
     if (v < 0.84) return 3;
     return 4;
   });
+
+  // Plain state so framer can actually animate the milestone crossfade —
+  // `transition` is ignored for style-bound MotionValues.
+  const [active, setActive] = useState(0);
+  useMotionValueEvent(activeIdx, "change", (v) => setActive(Math.round(v)));
 
   return (
     <section className="relative bg-base">
@@ -74,24 +86,33 @@ export function ScrollAnatomy() {
         <div className="font-mono-ui text-[11px] uppercase tracking-[0.3em] text-cobalt">
           // 02 / Forensic Trace
         </div>
-        <h2 className="font-display text-ink mt-4 leading-[1.05]" style={{ fontSize: "clamp(36px, 4.6vw, 64px)" }}>
+        <h2
+          className="font-display text-ink mt-4 leading-[1.05]"
+          style={{ fontSize: "clamp(36px, 4.6vw, 64px)" }}
+        >
           Unraveling a <em className="italic text-cobalt">mixer</em>, in real time.
         </h2>
         <p className="font-body text-ink-soft mt-6 max-w-[58ch] text-[16px] leading-relaxed">
-          One wallet. One mixer. One bridge. Watch PreCog illuminate a money trail that was built to disappear.
+          One wallet. One mixer. One bridge. Watch PreCog illuminate a money trail that was built to
+          disappear.
         </p>
       </div>
 
       <div ref={ref} className="relative" style={{ height: "460vh" }}>
         <div className="sticky top-0 h-screen w-full overflow-hidden">
-          <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-5 relative h-[60vh]">
+          {/* progress rail: how far through the trace you are */}
+          <motion.div
+            style={{ scaleX: p }}
+            className="absolute top-0 left-0 right-0 h-[2px] bg-cobalt origin-left z-10"
+          />
+          <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-full grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-center">
+            <div className="lg:col-span-5 relative h-[34vh] lg:h-[60vh]">
               {milestones.map((m, i) => (
-                <Milestone key={i} index={i} activeIdx={activeIdx} milestone={m} />
+                <Milestone key={i} isActive={active === i} milestone={m} />
               ))}
             </div>
 
-            <div className="lg:col-span-7 h-[82vh] relative">
+            <div className="lg:col-span-7 h-[52vh] lg:h-[82vh] relative">
               <Schematic
                 pEntry={pEntry}
                 pMixerNode={pMixerNode}
@@ -110,24 +131,18 @@ export function ScrollAnatomy() {
 }
 
 function Milestone({
-  index,
-  activeIdx,
+  isActive,
   milestone,
 }: {
-  index: number;
-  activeIdx: MotionValue<number>;
+  isActive: boolean;
   milestone: { label: string; title: string; body: string };
 }) {
-  const opacity = useTransform(activeIdx, (v) => (Math.round(v) === index ? 1 : 0));
-  const y = useTransform(activeIdx, (v) => (Math.round(v) === index ? 0 : 12));
-  const pointerEvents = useTransform(activeIdx, (v) =>
-    Math.round(v) === index ? "auto" : "none",
-  );
-
   return (
     <motion.div
-      style={{ opacity, y, pointerEvents }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      initial={false}
+      animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 12 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      style={{ pointerEvents: isActive ? "auto" : "none" }}
       className="absolute inset-0 flex flex-col justify-center"
     >
       <div className="font-mono-ui text-[11px] uppercase tracking-[0.3em] text-cobalt">
@@ -135,11 +150,11 @@ function Milestone({
       </div>
       <h3
         className="font-display italic text-ink mt-5 leading-[1.05]"
-        style={{ fontSize: "clamp(30px, 3.4vw, 48px)" }}
+        style={{ fontSize: "clamp(22px, 3.4vw, 48px)" }}
       >
         {milestone.title}
       </h3>
-      <p className="font-body text-ink-soft mt-6 max-w-[44ch] text-[16px] leading-relaxed">
+      <p className="font-body text-ink-soft mt-6 max-w-[44ch] text-[15px] lg:text-[16px] leading-relaxed">
         {milestone.body}
       </p>
     </motion.div>
@@ -212,10 +227,26 @@ function Schematic({
           <pattern id="forensic-grid" width="40" height="40" patternUnits="userSpaceOnUse">
             <path d="M 40 0 L 0 0 0 40" fill="none" stroke={GRID} strokeWidth="0.3" opacity="0.5" />
           </pattern>
-          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill={INK} />
           </marker>
-          <marker id="arrow-cobalt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow-cobalt"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill={COBALT} />
           </marker>
         </defs>
@@ -225,10 +256,22 @@ function Schematic({
         {/* ===== ENTRY ===== */}
         {/* Wallet node */}
         <circle cx={WALLET.x} cy={WALLET.y} r="5" fill={INK} />
-        <text x={WALLET.x - 8} y={WALLET.y - 14} fontSize="8" fontFamily="DM Mono, monospace" fill={SOFT}>
+        <text
+          x={WALLET.x - 8}
+          y={WALLET.y - 14}
+          fontSize="8"
+          fontFamily="DM Mono, monospace"
+          fill={SOFT}
+        >
           0x1Kuf...rkVo
         </text>
-        <text x={WALLET.x - 8} y={WALLET.y - 4} fontSize="7" fontFamily="DM Mono, monospace" fill={GRID}>
+        <text
+          x={WALLET.x - 8}
+          y={WALLET.y - 4}
+          fontSize="7"
+          fontFamily="DM Mono, monospace"
+          fill={GRID}
+        >
           t = 00:00
         </text>
 
@@ -247,10 +290,22 @@ function Schematic({
           {/* Mixer node — vortex glyph */}
           <circle cx={MIXER.x} cy={MIXER.y} r="14" fill="none" stroke={INK} strokeWidth="1" />
           <Vortex cx={MIXER.x} cy={MIXER.y} r={10} />
-          <text x={MIXER.x + 22} y={MIXER.y - 6} fontSize="10" fontFamily="DM Mono, monospace" fill={INK}>
+          <text
+            x={MIXER.x + 22}
+            y={MIXER.y - 6}
+            fontSize="10"
+            fontFamily="DM Mono, monospace"
+            fill={INK}
+          >
             Tornado Cash
           </text>
-          <text x={MIXER.x + 22} y={MIXER.y + 6} fontSize="7" fontFamily="DM Mono, monospace" fill={SOFT}>
+          <text
+            x={MIXER.x + 22}
+            y={MIXER.y + 6}
+            fontSize="7"
+            fontFamily="DM Mono, monospace"
+            fill={SOFT}
+          >
             mixer_contract
           </text>
         </motion.g>
@@ -280,16 +335,39 @@ function Schematic({
               fill={SOFT}
               style={{ opacity: pMixerBranches[i] }}
             >
-              0x{["a4","9f","c1"][i]}...{["3e","b2","77"][i]}
+              0x{["a4", "9f", "c1"][i]}...{["3e", "b2", "77"][i]}
             </motion.text>
           </g>
         ))}
 
         {/* ===== BRIDGE BAND ===== */}
         <motion.g style={{ opacity: pBridgeBand }}>
-          <line x1="0" y1={BRIDGE_Y - 24} x2="800" y2={BRIDGE_Y - 24} stroke={GRID} strokeWidth="0.5" strokeDasharray="3 4" />
-          <line x1="0" y1={BRIDGE_Y + 24} x2="800" y2={BRIDGE_Y + 24} stroke={GRID} strokeWidth="0.5" strokeDasharray="3 4" />
-          <text x="20" y={BRIDGE_Y - 30} fontSize="9" fontFamily="DM Mono, monospace" fill={COBALT} letterSpacing="2">
+          <line
+            x1="0"
+            y1={BRIDGE_Y - 24}
+            x2="800"
+            y2={BRIDGE_Y - 24}
+            stroke={GRID}
+            strokeWidth="0.5"
+            strokeDasharray="3 4"
+          />
+          <line
+            x1="0"
+            y1={BRIDGE_Y + 24}
+            x2="800"
+            y2={BRIDGE_Y + 24}
+            stroke={GRID}
+            strokeWidth="0.5"
+            strokeDasharray="3 4"
+          />
+          <text
+            x="20"
+            y={BRIDGE_Y - 30}
+            fontSize="9"
+            fontFamily="DM Mono, monospace"
+            fill={COBALT}
+            letterSpacing="2"
+          >
             BRIDGE · ETH → BTC
           </text>
           <text x="20" y={BRIDGE_Y + 38} fontSize="7" fontFamily="DM Mono, monospace" fill={SOFT}>
@@ -297,8 +375,18 @@ function Schematic({
           </text>
           {/* double-arrow glyph */}
           <g transform={`translate(680, ${BRIDGE_Y - 6})`}>
-            <path d="M 0 6 L 14 6 M 10 2 L 14 6 L 10 10" stroke={COBALT} strokeWidth="1" fill="none" />
-            <path d="M 30 6 L 16 6 M 20 2 L 16 6 L 20 10" stroke={COBALT} strokeWidth="1" fill="none" />
+            <path
+              d="M 0 6 L 14 6 M 10 2 L 14 6 L 10 10"
+              stroke={COBALT}
+              strokeWidth="1"
+              fill="none"
+            />
+            <path
+              d="M 30 6 L 16 6 M 20 2 L 16 6 L 20 10"
+              stroke={COBALT}
+              strokeWidth="1"
+              fill="none"
+            />
           </g>
         </motion.g>
 
@@ -331,10 +419,22 @@ function Schematic({
         {/* BTC dest node */}
         <motion.g style={{ opacity: pBridgeCross }}>
           <rect x={BTC_DEST.x - 5} y={BTC_DEST.y - 5} width="10" height="10" fill={INK} />
-          <text x={BTC_DEST.x + 12} y={BTC_DEST.y - 2} fontSize="9" fontFamily="DM Mono, monospace" fill={INK}>
+          <text
+            x={BTC_DEST.x + 12}
+            y={BTC_DEST.y - 2}
+            fontSize="9"
+            fontFamily="DM Mono, monospace"
+            fill={INK}
+          >
             bc1q...m2v8
           </text>
-          <text x={BTC_DEST.x + 12} y={BTC_DEST.y + 8} fontSize="7" fontFamily="DM Mono, monospace" fill={SOFT}>
+          <text
+            x={BTC_DEST.x + 12}
+            y={BTC_DEST.y + 8}
+            fontSize="7"
+            fontFamily="DM Mono, monospace"
+            fill={SOFT}
+          >
             chain: btc
           </text>
         </motion.g>
@@ -374,11 +474,15 @@ function Schematic({
         {PEDI_NODES.map((n, i) => (
           <motion.g key={i} style={{ opacity: pPedi }}>
             <circle cx={n.x} cy={n.y} r={n.hot ? 4 : 3} fill={n.hot ? BAD : SOFT} />
+            {n.hot && <circle cx={n.x} cy={n.y} r="9" fill="none" stroke={BAD} strokeWidth="0.6" />}
             {n.hot && (
-              <circle cx={n.x} cy={n.y} r="9" fill="none" stroke={BAD} strokeWidth="0.6" />
-            )}
-            {n.hot && (
-              <text x={n.x + 10} y={n.y + 3} fontSize="6.5" fontFamily="DM Mono, monospace" fill={BAD}>
+              <text
+                x={n.x + 10}
+                y={n.y + 3}
+                fontSize="6.5"
+                fontFamily="DM Mono, monospace"
+                fill={BAD}
+              >
                 FLAGGED
               </text>
             )}
@@ -425,10 +529,24 @@ function Verdict({ pVerdict }: { pVerdict: MotionValue<number>[] }) {
     <g>
       <motion.g style={{ opacity: pVerdict[0] }}>
         <rect x={x} y={y} width={w} height={h} fill="#fff" stroke={INK} strokeWidth="1" />
-        <text x={x + 14} y={y + 22} fontSize="9" fontFamily="DM Mono, monospace" fill={INK} letterSpacing="2">
+        <text
+          x={x + 14}
+          y={y + 22}
+          fontSize="9"
+          fontFamily="DM Mono, monospace"
+          fill={INK}
+          letterSpacing="2"
+        >
           VERDICT
         </text>
-        <text x={x + w - 14} y={y + 22} textAnchor="end" fontSize="8" fontFamily="DM Mono, monospace" fill={COBALT}>
+        <text
+          x={x + w - 14}
+          y={y + 22}
+          textAnchor="end"
+          fontSize="8"
+          fontFamily="DM Mono, monospace"
+          fill={COBALT}
+        >
           ● locked
         </text>
         <line x1={x + 14} y1={y + 32} x2={x + w - 14} y2={y + 32} stroke={GRID} strokeWidth="0.5" />
@@ -461,8 +579,22 @@ function Verdict({ pVerdict }: { pVerdict: MotionValue<number>[] }) {
 
       {/* score line — pulses once via cobalt fill on last */}
       <motion.g style={{ opacity: pVerdict[4] }}>
-        <line x1={x + 14} y1={y + h - 56} x2={x + w - 14} y2={y + h - 56} stroke={GRID} strokeWidth="0.5" />
-        <text x={x + 14} y={y + h - 22} fontSize="9" fontFamily="DM Mono, monospace" fill={SOFT} letterSpacing="1.5">
+        <line
+          x1={x + 14}
+          y1={y + h - 56}
+          x2={x + w - 14}
+          y2={y + h - 56}
+          stroke={GRID}
+          strokeWidth="0.5"
+        />
+        <text
+          x={x + 14}
+          y={y + h - 22}
+          fontSize="9"
+          fontFamily="DM Mono, monospace"
+          fill={SOFT}
+          letterSpacing="1.5"
+        >
           SCORE
         </text>
         <text

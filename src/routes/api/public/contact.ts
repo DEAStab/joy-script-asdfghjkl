@@ -5,6 +5,8 @@ import { z } from "zod";
 const ContactSchema = z.object({
   email: z.string().trim().email().max(255),
   message: z.string().trim().min(1).max(5000),
+  // Honeypot: hidden field humans never fill. Non-empty means a bot.
+  company: z.string().max(255).optional(),
 });
 
 const RESEND_API_URL = "https://api.resend.com/emails";
@@ -38,7 +40,12 @@ export const Route = createFileRoute("/api/public/contact")({
               { status: 400 },
             );
           }
-          const { email, message } = parsed.data;
+          const { email, message, company } = parsed.data;
+
+          // Honeypot tripped: report success, send nothing, spend no quota.
+          if (company) {
+            return Response.json({ ok: true });
+          }
 
           // Trim so a stray space/newline from pasting the secret can't trigger a false 401.
           const apiKey = process.env.RESEND_API_KEY?.trim();

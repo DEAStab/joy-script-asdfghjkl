@@ -45,6 +45,8 @@
   --ink: #0e0e0e;
   --ink-soft: #3a3a3a;
   --cobalt: #0047ff;
+  --cobalt-press: #0036c4;
+  --cobalt-bright: #6690ff; /* cobalt for dark surfaces — #0047FF is ~3:1 on near-black */
   --muted-line: #c8c8c8;
   --panel-soft: #f0eee9;
 
@@ -73,7 +75,15 @@
     border-color: var(--color-border);
     border-radius: 0 !important;
   }
-  html, body {
+  html {
+    scroll-behavior: smooth;
+  }
+  /* anchor targets clear the fixed 64px nav */
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
+  html,
+  body {
     background-color: var(--color-base);
     color: var(--color-ink);
     font-family: var(--font-body);
@@ -83,26 +93,114 @@
     background: var(--cobalt);
     color: #fff;
   }
+  :focus-visible {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-display); }
-  .font-mono-ui { font-family: var(--font-mono); }
-  .font-body { font-family: var(--font-body); }
-  .text-cobalt { color: var(--cobalt); }
-  .bg-cobalt { background-color: var(--cobalt); }
-  .border-cobalt { border-color: var(--cobalt); }
-  .text-ink { color: var(--ink); }
-  .text-ink-soft { color: var(--ink-soft); }
-  .bg-base { background-color: var(--base); }
-  .bg-surface { background-color: var(--surface); }
-  .bg-panel-soft { background-color: var(--panel-soft); }
-  .border-muted-line { border-color: var(--muted-line); }
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-mono-ui {
+    font-family: var(--font-mono);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .text-cobalt {
+    color: var(--cobalt);
+  }
+  .text-cobalt-bright {
+    color: var(--cobalt-bright);
+  }
+  .bg-cobalt {
+    background-color: var(--cobalt);
+  }
+  .border-cobalt {
+    border-color: var(--cobalt);
+  }
+  .text-ink {
+    color: var(--ink);
+  }
+  .text-ink-soft {
+    color: var(--ink-soft);
+  }
+  .bg-base {
+    background-color: var(--base);
+  }
+  .bg-surface {
+    background-color: var(--surface);
+  }
+  .bg-panel-soft {
+    background-color: var(--panel-soft);
+  }
+  .border-muted-line {
+    border-color: var(--muted-line);
+  }
+}
+
+/* underline reveal for mono links — pair with hover:text-* color shifts */
+.link-rule {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.link-rule:hover,
+.link-rule[data-active="true"] {
+  background-size: 100% 1px;
+}
+
+@keyframes form-shake {
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+.form-shake {
+  animation: form-shake 320ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes panel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.panel-rise {
+  animation: panel-rise 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-shake,
+  .panel-rise {
+    animation: none;
+  }
+  .link-rule {
+    transition: none;
+  }
 }
 
 @keyframes wordmark-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.85; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.85;
+  }
 }
 
 .wordmark-breathe {
