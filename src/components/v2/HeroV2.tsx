@@ -63,7 +63,7 @@ export function HeroV2() {
             to="/access"
             className="font-mono-ui text-[11px] uppercase tracking-[0.28em] bg-cobalt text-white px-7 py-4 hover:bg-[var(--cobalt-press)] hover:-translate-y-px active:translate-y-0 transition-[transform,background-color] duration-200"
           >
-            Initiate access
+            Request access
           </Link>
           <a
             href="#trace"

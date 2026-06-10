@@ -38,37 +38,37 @@
 }
 
 /* ===================================================================
-   THEME: dark console (default) — applied at :root and data-theme=dark
+   THEME: light console (default) — "blueprint on paper"
    =================================================================== */
 :root,
-:root[data-theme="dark"] {
+:root[data-theme="light"] {
   --radius: 0;
-  color-scheme: dark;
+  color-scheme: light;
 
-  --base: #05070b; /* near-black blue */
-  --surface: #0a0e16; /* raised panel */
-  --ink: #e8ecf4;
-  --ink-soft: #8a93a6;
-  --cobalt: #4d7dff; /* readable electric cobalt on dark */
+  --base: #e9edf4; /* cool light blue-grey */
+  --surface: #ffffff;
+  --ink: #0b1120; /* near-black navy */
+  --ink-soft: #55617a;
+  --cobalt: #0b46e6; /* deeper cobalt for AA contrast on light */
   --cobalt-fill: #0047ff; /* brand cobalt for solid fills */
   --cobalt-press: #0036c4;
-  --cobalt-rgb: 77, 125, 255;
-  --signal: #3cf59a; /* system-online green */
-  --threat: #ff5c5c; /* flagged red */
-  --muted-line: rgba(232, 236, 244, 0.12);
-  --panel-soft: #0d1320;
+  --cobalt-rgb: 11, 70, 230;
+  --signal: #0a8f55; /* darker green, legible on light */
+  --threat: #d62828;
+  --muted-line: rgba(11, 17, 32, 0.16);
+  --panel-soft: #dde3ef;
 
   /* surfaces composed with alpha */
-  --base-rgb: 5, 7, 11;
-  --grid-line: rgba(232, 236, 244, 0.035);
-  --scanline: rgba(232, 236, 244, 0.022);
+  --base-rgb: 233, 237, 244;
+  --grid-line: rgba(11, 17, 32, 0.05);
+  --scanline: rgba(11, 17, 32, 0.018);
 
   /* network-canvas palette (comma rgb triplets) */
-  --net-edge: 77, 125, 255;
-  --net-edge-threat: 255, 92, 92;
-  --net-node: 190, 205, 235;
-  --net-node-threat: 255, 92, 92;
-  --net-pulse: 141, 175, 255;
+  --net-edge: 0, 71, 255;
+  --net-edge-threat: 200, 30, 30;
+  --net-node: 40, 54, 86;
+  --net-node-threat: 200, 30, 30;
+  --net-pulse: 0, 71, 255;
 
   --background: var(--base);
   --foreground: var(--ink);
@@ -83,7 +83,7 @@
   --muted: var(--panel-soft);
   --muted-foreground: var(--ink-soft);
   --accent: var(--cobalt);
-  --accent-foreground: #05070b;
+  --accent-foreground: #ffffff;
   --destructive: var(--threat);
   --border: var(--muted-line);
   --input: var(--muted-line);
@@ -91,35 +91,35 @@
 }
 
 /* ===================================================================
-   THEME: light console — "blueprint on paper"
+   THEME: dark console — the one you switch into
    =================================================================== */
-:root[data-theme="light"] {
-  color-scheme: light;
+:root[data-theme="dark"] {
+  color-scheme: dark;
 
-  --base: #e9edf4; /* cool light blue-grey */
-  --surface: #ffffff;
-  --ink: #0b1120; /* near-black navy */
-  --ink-soft: #55617a;
-  --cobalt: #0b46e6; /* deeper cobalt for AA contrast on light */
+  --base: #05070b; /* near-black blue */
+  --surface: #0a0e16; /* raised panel */
+  --ink: #e8ecf4;
+  --ink-soft: #8a93a6;
+  --cobalt: #4d7dff; /* readable electric cobalt on dark */
   --cobalt-fill: #0047ff;
   --cobalt-press: #0036c4;
-  --cobalt-rgb: 11, 70, 230;
-  --signal: #0a8f55; /* darker green, legible on light */
-  --threat: #d62828;
-  --muted-line: rgba(11, 17, 32, 0.16);
-  --panel-soft: #dde3ef;
+  --cobalt-rgb: 77, 125, 255;
+  --signal: #3cf59a; /* system-online green */
+  --threat: #ff5c5c; /* flagged red */
+  --muted-line: rgba(232, 236, 244, 0.12);
+  --panel-soft: #0d1320;
 
-  --base-rgb: 233, 237, 244;
-  --grid-line: rgba(11, 17, 32, 0.05);
-  --scanline: rgba(11, 17, 32, 0.018);
+  --base-rgb: 5, 7, 11;
+  --grid-line: rgba(232, 236, 244, 0.035);
+  --scanline: rgba(232, 236, 244, 0.022);
 
-  --net-edge: 0, 71, 255;
-  --net-edge-threat: 200, 30, 30;
-  --net-node: 40, 54, 86;
-  --net-node-threat: 200, 30, 30;
-  --net-pulse: 0, 71, 255;
+  --net-edge: 77, 125, 255;
+  --net-edge-threat: 255, 92, 92;
+  --net-node: 190, 205, 235;
+  --net-node-threat: 255, 92, 92;
+  --net-pulse: 141, 175, 255;
 
-  --accent-foreground: #ffffff;
+  --accent-foreground: #05070b;
 }
 
 @layer base {

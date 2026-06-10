@@ -81,7 +81,7 @@ export function NavV2() {
             to="/access"
             className="hud-frame font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink border border-muted-line px-4 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
           >
-            Initiate access
+            Request access
           </Link>
         </div>
       </div>

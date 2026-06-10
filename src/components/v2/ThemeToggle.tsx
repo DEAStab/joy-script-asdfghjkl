@@ -47,13 +47,12 @@ function MoonIcon() {
  * re-read its palette.
  */
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  // Light is the site default; dark is the theme you switch into.
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const attr = document.documentElement.getAttribute("data-theme");
-    setTheme(attr === "light" ? "light" : "dark");
-    setMounted(true);
+    setTheme(attr === "dark" ? "dark" : "light");
   }, []);
 
   const toggle = () => {
@@ -71,7 +70,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     window.setTimeout(() => root.classList.remove("theme-transition"), 480);
   };
 
-  const isLight = mounted && theme === "light";
+  const isLight = theme === "light";
 
   return (
     <button

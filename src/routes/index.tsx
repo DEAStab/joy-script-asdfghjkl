@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BootOverlay } from "@/components/v2/BootOverlay";
 import { CursorReticle } from "@/components/v2/CursorReticle";
 import { NavV2 } from "@/components/v2/NavV2";
 import { HeroV2 } from "@/components/v2/HeroV2";
@@ -33,7 +32,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <main className="bg-base text-ink relative">
-      <BootOverlay />
       <CursorReticle />
       <div className="scanlines fixed inset-0 z-[80]" aria-hidden="true" />
       <NavV2 />
