@@ -1,39 +1,51 @@
 import { Link } from "@tanstack/react-router";
 
+const links = [
+  { label: "Modules", href: "#modules" },
+  { label: "Demo", href: "#demo" },
+  { label: "Method", href: "#method" },
+  { label: "Request Access", href: "/access" },
+  { label: "Contact", href: "mailto:reply@00bit.io" },
+];
+
 export function FooterV2() {
   return (
-    <footer className="border-t border-muted-line">
-      <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-14 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+    <footer className="bg-base border-t border-muted-line">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-16 grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
-          <div className="font-mono-ui lowercase text-ink text-[14px] tracking-[0.18em]">00bit</div>
-          <div className="font-mono-ui text-[9px] uppercase tracking-[0.28em] text-ink-soft mt-4">
+          <div className="font-mono-ui text-[12px] tracking-[0.18em] text-ink">
+            <span className="zero-slashed">0</span>
+            <span className="zero-slashed">0</span>bit
+          </div>
+          <div className="font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft mt-6">
             © {new Date().getFullYear()} 00bit. All rights reserved.
           </div>
+          <div className="font-body italic text-ink-soft mt-4 text-[13px] max-w-[40ch]">
+            Operated quietly. Audited openly.
+          </div>
         </div>
-        <div className="font-mono-ui text-[10px] uppercase tracking-[0.26em] text-ink-soft leading-[2.4]">
-          <a href="#modules" className="link-rule block w-fit hover:text-ink transition-colors">
-            Instruments
-          </a>
-          <a href="#trace" className="link-rule block w-fit hover:text-ink transition-colors">
-            Simulation
-          </a>
-          <a href="#doctrine" className="link-rule block w-fit hover:text-ink transition-colors">
-            Doctrine
-          </a>
-          <Link to="/access" className="link-rule block w-fit hover:text-ink transition-colors">
-            Request access
-          </Link>
-          <a
-            href="mailto:reply@00bit.io"
-            className="link-rule block w-fit hover:text-ink transition-colors"
-          >
-            Contact
-          </a>
-        </div>
-        <div className="md:text-right font-mono-ui text-[10px] uppercase tracking-[0.26em] text-ink-soft/60">
-          Operated quietly.
-          <br />
-          Audited openly.
+        <div className="flex md:justify-end">
+          <ul className="grid grid-cols-2 gap-x-12 gap-y-3 content-start">
+            {links.map((l) => (
+              <li key={l.label}>
+                {l.href.startsWith("/") ? (
+                  <Link
+                    to={l.href}
+                    className="link-rule font-mono-ui text-[11px] uppercase tracking-[0.28em] text-ink hover:text-cobalt transition-colors"
+                  >
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={l.href}
+                    className="link-rule font-mono-ui text-[11px] uppercase tracking-[0.28em] text-ink hover:text-cobalt transition-colors"
+                  >
+                    {l.label}
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       <div className="h-px bg-cobalt w-full" />

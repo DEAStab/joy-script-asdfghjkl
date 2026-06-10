@@ -3,29 +3,12 @@ import { Link } from "@tanstack/react-router";
 import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
-  { label: "Feed", href: "#feed" },
   { label: "Modules", href: "#modules" },
-  { label: "Trace", href: "#trace" },
-  { label: "Doctrine", href: "#doctrine" },
+  { label: "Demo", href: "#demo" },
+  { label: "Method", href: "#method" },
 ];
 
-function useUtcClock() {
-  const [now, setNow] = useState("--:--:--");
-  useEffect(() => {
-    const fmt = () => {
-      const d = new Date();
-      const p = (n: number) => String(n).padStart(2, "0");
-      setNow(`${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`);
-    };
-    fmt();
-    const id = setInterval(fmt, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return now;
-}
-
 export function NavV2() {
-  const clock = useUtcClock();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -38,33 +21,34 @@ export function NavV2() {
   return (
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 border-b ${
-        scrolled ? "bg-base/70 border-muted-line" : "bg-transparent border-transparent"
+        scrolled ? "bg-base/85 border-muted-line" : "bg-transparent border-transparent"
       }`}
       style={
         scrolled
           ? {
-              backdropFilter: "blur(14px) saturate(1.4)",
-              WebkitBackdropFilter: "blur(14px) saturate(1.4)",
+              backdropFilter: "blur(12px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(12px) saturate(1.2)",
             }
           : undefined
       }
     >
-      <div className="max-w-[1500px] mx-auto px-5 md:px-10 h-16 flex items-center justify-between gap-6">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-6">
         <a href="#top" className="flex items-baseline gap-2.5">
-          <span className="font-mono-ui lowercase text-ink font-semibold text-[16px] tracking-[0.08em]">
-            00bit
+          <span className="font-mono-ui text-ink text-[14px] tracking-[0.18em]">
+            <span className="zero-slashed">0</span>
+            <span className="zero-slashed">0</span>bit
           </span>
-          <span className="hidden sm:inline font-body text-[12px] font-medium text-ink-soft">
+          <span className="hidden sm:inline font-body italic text-[12px] text-ink-soft">
             / PreCog
           </span>
         </a>
 
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
             <a
               key={l.label}
               href={l.href}
-              className="link-rule font-body text-[13.5px] font-medium text-ink-soft hover:text-ink transition-colors"
+              className="link-rule font-mono-ui text-[11px] uppercase tracking-[0.18em] text-ink-soft hover:text-ink transition-colors"
             >
               {l.label}
             </a>
@@ -72,16 +56,12 @@ export function NavV2() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden md:flex items-center gap-2 font-body text-[12.5px] font-medium text-ink-soft">
-            <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-            Live · <span className="font-mono-ui text-[11.5px] tabular-nums">{clock} UTC</span>
-          </span>
           <ThemeToggle />
           <Link
             to="/access"
-            className="hud-frame font-body text-[13px] font-semibold text-ink border border-muted-line px-5 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
+            className="font-mono-ui text-[11px] uppercase tracking-[0.18em] bg-cobalt text-white px-5 py-2.5 hover:bg-[var(--cobalt-press)] transition-colors"
           >
-            Request access
+            Request Access
           </Link>
         </div>
       </div>

@@ -79,8 +79,7 @@ function AccessPage() {
   };
 
   return (
-    <main className="bg-base text-ink min-h-screen px-5 md:px-10 py-14 grid-bg">
-      <div className="scanlines fixed inset-0 z-[80] pointer-events-none" aria-hidden="true" />
+    <main className="bg-base text-ink min-h-screen px-5 md:px-10 py-14">
       <div className="max-w-[680px] mx-auto relative">
         <div className="flex items-center justify-between gap-4">
           <Link
@@ -116,7 +115,7 @@ function AccessPage() {
         {status === "sent" ? (
           <section
             aria-live="polite"
-            className="panel-rise hud-frame mt-12 border border-muted-line bg-surface p-8 md:p-10"
+            className="panel-rise mt-12 border border-muted-line bg-surface p-8 md:p-10"
           >
             <div className="font-mono-ui text-[9px] uppercase tracking-[0.32em] text-signal">
               ● message delivered
@@ -147,7 +146,7 @@ function AccessPage() {
             onSubmit={onSubmit}
             noValidate
             onAnimationEnd={() => setShaking(false)}
-            className={`hud-frame mt-12 border border-muted-line bg-surface ${shaking ? "form-shake" : ""}`}
+            className={`mt-12 border border-muted-line bg-surface ${shaking ? "form-shake" : ""}`}
           >
             <div className="flex items-center justify-between px-5 py-3 border-b border-muted-line">
               <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">

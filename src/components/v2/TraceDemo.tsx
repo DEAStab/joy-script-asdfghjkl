@@ -40,30 +40,29 @@ export function TraceDemo() {
   const subject = value.trim() || "0x84f3…c2e1";
 
   return (
-    <section id="trace" className="border-y border-muted-line grid-bg">
-      <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
+    <section id="demo" className="border-y border-muted-line bg-panel-soft">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-28 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-5">
-          <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            03 / simulation
+          <div className="font-mono-ui text-[11px] uppercase tracking-[0.3em] text-cobalt">
+            {"// 03 / A worked example"}
           </div>
           <h2
-            className="font-display font-medium text-ink mt-5 leading-[1.02] tracking-[-0.03em] [text-wrap:balance]"
-            style={{ fontSize: "clamp(34px, 3.6vw, 56px)" }}
+            className="font-display text-ink mt-4 leading-[1.05] [text-wrap:balance]"
+            style={{ fontSize: "clamp(34px, 3.8vw, 56px)" }}
           >
-            Run a trace. Watch it think.
+            Run a trace, <em className="italic text-cobalt">step by step</em>.
           </h2>
-          <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[44ch]">
-            Drop any address — or run the canned case — and watch the engine narrate its own
-            reasoning, signal by signal. This is the level of explanation every real verdict ships
-            with.
+          <p className="font-body text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[44ch]">
+            Enter any address — or run the example — and watch the engine narrate its own reasoning,
+            signal by signal. Every real verdict ships with this level of explanation.
           </p>
-          <p className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft/60 mt-8">
-            simulation · illustrative output only
+          <p className="font-mono-ui text-[10px] uppercase tracking-[0.26em] text-ink-soft/70 mt-8">
+            Demo — illustrative output only
           </p>
         </div>
 
         <div className="lg:col-span-7">
-          <div className="hud-frame bg-surface border border-muted-line">
+          <div className="bg-surface border border-muted-line">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -77,31 +76,31 @@ export function TraceDemo() {
               <input
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="0x84f3…c2e1 — paste an address or run the case file"
+                placeholder="0x84f3…c2e1 — paste an address or run the example"
                 spellCheck={false}
-                className="flex-1 bg-transparent outline-none px-4 py-4 font-mono-ui text-[12px] md:text-[13px] text-ink placeholder:text-ink-soft/40"
+                className="flex-1 bg-transparent outline-none px-4 py-4 font-mono-ui text-[12px] md:text-[13px] text-ink placeholder:text-ink-soft/50"
                 aria-label="Address to trace"
               />
               <button
                 type="submit"
                 disabled={phase === "running"}
-                className="font-mono-ui text-[10px] uppercase tracking-[0.26em] bg-cobalt text-white px-6 hover:bg-[var(--cobalt-press)] transition-colors disabled:opacity-50"
+                className="font-mono-ui text-[10px] uppercase tracking-[0.24em] bg-cobalt text-white px-6 hover:bg-[var(--cobalt-press)] transition-colors disabled:opacity-50"
               >
-                {phase === "running" ? "tracing…" : "run trace"}
+                {phase === "running" ? "Tracing…" : "Run trace"}
               </button>
             </form>
 
             <div className="px-5 md:px-6 py-5 font-mono-ui text-[11px] md:text-[12px] leading-[2.3] min-h-[240px]">
               {phase === "idle" && (
-                <div className="text-ink-soft/50">
-                  awaiting subject{" "}
+                <div className="text-ink-soft/70">
+                  Enter an address to begin{" "}
                   <span className="caret-blink inline-block w-[7px] h-[12px] bg-cobalt align-middle" />
                 </div>
               )}
               {phase !== "idle" && (
                 <>
-                  <div className="text-ink-soft/60">
-                    case file · subject <span className="text-ink">{subject}</span>
+                  <div className="text-ink-soft/80">
+                    Example trace · subject <span className="text-ink">{subject}</span>
                   </div>
                   {STEPS.slice(0, step).map((s, i) => (
                     <div key={i} className="flex flex-wrap gap-x-3">
@@ -129,7 +128,7 @@ export function TraceDemo() {
                   <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
                     <div>
                       <div
-                        className="font-display font-medium text-threat leading-none"
+                        className="font-display text-threat leading-none"
                         style={{ fontSize: "clamp(44px, 5vw, 72px)" }}
                       >
                         91
@@ -137,13 +136,13 @@ export function TraceDemo() {
                           / CRITICAL
                         </span>
                       </div>
-                      <div className="mt-3 text-[10px] uppercase tracking-[0.26em] text-ink-soft">
+                      <div className="mt-3 font-mono-ui text-[10px] uppercase tracking-[0.26em] text-ink-soft">
                         pattern: MIX_THEN_BRIDGE_v2
                       </div>
                     </div>
                     <Link
                       to="/access"
-                      className="font-mono-ui text-[10px] uppercase tracking-[0.26em] bg-cobalt text-white px-5 py-3.5 hover:bg-[var(--cobalt-press)] hover:-translate-y-px active:translate-y-0 transition-[transform,background-color] duration-200"
+                      className="font-mono-ui text-[10px] uppercase tracking-[0.24em] bg-cobalt text-white px-5 py-3.5 hover:bg-[var(--cobalt-press)] transition-colors"
                     >
                       Request full report →
                     </Link>

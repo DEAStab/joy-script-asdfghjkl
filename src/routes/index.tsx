@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CursorReticle } from "@/components/v2/CursorReticle";
 import { NavV2 } from "@/components/v2/NavV2";
-import { HeroV2 } from "@/components/v2/HeroV2";
-import { LiveFeed } from "@/components/v2/LiveFeed";
-import { ModulesDeck } from "@/components/v2/ModulesDeck";
+import { HeroEditorial } from "@/components/v2/HeroEditorial";
+import { MetricsStrip } from "@/components/v2/MetricsStrip";
+import { ModulesEditorial } from "@/components/v2/ModulesEditorial";
 import { TraceDemo } from "@/components/v2/TraceDemo";
-import { Doctrine } from "@/components/v2/Doctrine";
+import { MethodBand } from "@/components/v2/MethodBand";
 import { CtaSection } from "@/components/v2/CtaSection";
 import { FooterV2 } from "@/components/v2/FooterV2";
 
@@ -21,7 +20,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "PreCog — Blockchain intelligence by 00bit" },
       {
         property: "og:description",
-        content: "See it before it happens. Multi-chain risk scoring with auditable evidence.",
+        content:
+          "Detect the signal before the noise becomes the story. Multi-chain risk scoring with auditable evidence.",
       },
     ],
   }),
@@ -31,14 +31,12 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <main className="bg-base text-ink relative">
-      <CursorReticle />
-      <div className="scanlines fixed inset-0 z-[80]" aria-hidden="true" />
       <NavV2 />
-      <HeroV2 />
-      <LiveFeed />
-      <ModulesDeck />
+      <HeroEditorial />
+      <MetricsStrip />
+      <ModulesEditorial />
       <TraceDemo />
-      <Doctrine />
+      <MethodBand />
       <CtaSection />
       <FooterV2 />
     </main>

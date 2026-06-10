@@ -32,42 +32,50 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-display: "Space Grotesk", sans-serif;
+  --font-display: "Playfair Display", serif;
   --font-mono: "IBM Plex Mono", monospace;
-  --font-body: "Space Grotesk", sans-serif;
+  --font-body: "Libre Baskerville", serif;
 }
 
 /* ===================================================================
-   THEME: light console (default) — "blueprint on paper"
+   THEME: light (default) — the original paper editorial
    =================================================================== */
 :root,
 :root[data-theme="light"] {
   --radius: 0;
   color-scheme: light;
 
-  --base: #e9edf4; /* cool light blue-grey */
+  --base: #f5f4f1; /* warm paper */
   --surface: #ffffff;
-  --ink: #0b1120; /* near-black navy */
-  --ink-soft: #3a4660; /* dark slate — secondary text stays clearly readable */
-  --cobalt: #0b46e6; /* deeper cobalt for AA contrast on light */
-  --cobalt-fill: #0047ff; /* brand cobalt for solid fills */
+  --ink: #0e0e0e;
+  --ink-soft: #3f3f3f; /* secondary text stays clearly readable */
+  --cobalt: #0047ff; /* brand cobalt — fills and accents */
+  --cobalt-fill: #0047ff;
   --cobalt-press: #0036c4;
-  --cobalt-rgb: 11, 70, 230;
-  --signal: #0a8f55; /* darker green, legible on light */
-  --threat: #d62828;
-  --muted-line: rgba(11, 17, 32, 0.16);
-  --panel-soft: #dde3ef;
+  --cobalt-bright: #6690ff; /* accessible cobalt for dark bands */
+  --cobalt-rgb: 0, 71, 255;
+  --signal: #1f7a4d; /* muted editorial green */
+  --threat: #c53030; /* muted editorial red */
+  --muted-line: #c8c8c8;
+  --panel-soft: #f0eee9;
+
+  /* near-black editorial band (Method section) */
+  --band-bg: #0e0e0e;
+  --band-panel: #161616;
+  --band-ink: #f2f1ec;
+  --band-ink-soft: rgba(242, 241, 236, 0.68);
+  --band-line: rgba(242, 241, 236, 0.14);
 
   /* surfaces composed with alpha */
-  --base-rgb: 233, 237, 244;
-  --grid-line: rgba(11, 17, 32, 0.05);
-  --scanline: rgba(11, 17, 32, 0.018);
+  --base-rgb: 245, 244, 241;
+  --grid-line: rgba(14, 14, 14, 0.05);
+  --scanline: rgba(14, 14, 14, 0.018);
 
   /* network-canvas palette (comma rgb triplets) */
   --net-edge: 0, 71, 255;
-  --net-edge-threat: 200, 30, 30;
-  --net-node: 40, 54, 86;
-  --net-node-threat: 200, 30, 30;
+  --net-edge-threat: 197, 48, 48;
+  --net-node: 63, 63, 63;
+  --net-node-threat: 197, 48, 48;
   --net-pulse: 0, 71, 255;
 
   --background: var(--base);
@@ -91,35 +99,43 @@
 }
 
 /* ===================================================================
-   THEME: dark console — the one you switch into
+   THEME: dark — deep-ink variant of the same editorial page
    =================================================================== */
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --base: #05070b; /* near-black blue */
-  --surface: #0a0e16; /* raised panel */
-  --ink: #e8ecf4;
-  --ink-soft: #a3adc2; /* brighter slate — secondary text stays clearly readable */
-  --cobalt: #4d7dff; /* readable electric cobalt on dark */
+  --base: #111110; /* deep warm ink */
+  --surface: #1a1a18; /* raised panel */
+  --ink: #f2f1ec;
+  --ink-soft: #b3b1a8; /* secondary text stays clearly readable */
+  --cobalt: #6690ff; /* readable cobalt for text accents on dark */
   --cobalt-fill: #0047ff;
-  --cobalt-press: #0036c4;
-  --cobalt-rgb: 77, 125, 255;
-  --signal: #3cf59a; /* system-online green */
-  --threat: #ff5c5c; /* flagged red */
-  --muted-line: rgba(232, 236, 244, 0.12);
-  --panel-soft: #0d1320;
+  --cobalt-press: #1a5cff;
+  --cobalt-bright: #6690ff;
+  --cobalt-rgb: 102, 144, 255;
+  --signal: #4dae82; /* muted green, legible on ink */
+  --threat: #e36868; /* muted red, legible on ink */
+  --muted-line: rgba(242, 241, 236, 0.16);
+  --panel-soft: #161614;
 
-  --base-rgb: 5, 7, 11;
-  --grid-line: rgba(232, 236, 244, 0.035);
-  --scanline: rgba(232, 236, 244, 0.022);
+  /* the Method band sits on the surface tone in dark mode */
+  --band-bg: #1a1a18;
+  --band-panel: #222220;
+  --band-ink: #f2f1ec;
+  --band-ink-soft: rgba(242, 241, 236, 0.68);
+  --band-line: rgba(242, 241, 236, 0.14);
 
-  --net-edge: 77, 125, 255;
-  --net-edge-threat: 255, 92, 92;
-  --net-node: 190, 205, 235;
-  --net-node-threat: 255, 92, 92;
+  --base-rgb: 17, 17, 16;
+  --grid-line: rgba(242, 241, 236, 0.035);
+  --scanline: rgba(242, 241, 236, 0.022);
+
+  --net-edge: 102, 144, 255;
+  --net-edge-threat: 227, 104, 104;
+  --net-node: 213, 211, 202;
+  --net-node-threat: 227, 104, 104;
   --net-pulse: 141, 175, 255;
 
-  --accent-foreground: #05070b;
+  --accent-foreground: #111110;
 }
 
 @layer base {
@@ -210,6 +226,25 @@ html.theme-transition *::after {
   }
   .border-muted-line {
     border-color: var(--muted-line);
+  }
+  /* near-black editorial band (Method section) */
+  .text-cobalt-bright {
+    color: var(--cobalt-bright);
+  }
+  .bg-band {
+    background-color: var(--band-bg);
+  }
+  .bg-band-panel {
+    background-color: var(--band-panel);
+  }
+  .text-band-ink {
+    color: var(--band-ink);
+  }
+  .text-band-soft {
+    color: var(--band-ink-soft);
+  }
+  .border-band-line {
+    border-color: var(--band-line);
   }
 }
 
