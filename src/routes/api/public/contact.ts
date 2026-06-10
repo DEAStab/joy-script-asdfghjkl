@@ -12,7 +12,7 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 const TO_ADDRESSES = ["avivstabinsky@gmail.com", "reply@00bit.io"];
 // Sender must be on a domain verified in Resend (00bit.io).
 const FROM_ADDRESS = "00bit Request Access <reply@00bit.io>";
-const RESEND_TIMEOUT_MS = 12000;
+const RESEND_TIMEOUT_MS = 4000;
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -86,7 +86,11 @@ export const Route = createFileRoute("/api/public/contact")({
               signal: controller.signal,
             });
           } catch (err) {
-            const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+            const reason = controller.signal.aborted
+              ? `timed out after ${RESEND_TIMEOUT_MS}ms (the request to Resend is hanging)`
+              : err instanceof Error
+                ? `${err.name}: ${err.message}`
+                : String(err);
             console.error("Resend request failed to reach the API", reason);
             // TEMP DEBUG: surface the real reason on the form.
             return Response.json({ error: `Could not reach Resend — ${reason}` }, { status: 502 });
