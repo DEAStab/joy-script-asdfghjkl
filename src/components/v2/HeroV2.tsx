@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { NetworkCanvas } from "./NetworkCanvas";
+import { Scramble } from "./Scramble";
 
 export function HeroV2() {
   const reduce = useReducedMotion();
@@ -31,9 +32,11 @@ export function HeroV2() {
             className="font-display font-medium text-ink mt-8 leading-[1.02] tracking-[-0.03em]"
             style={{ fontSize: "clamp(44px, 6.2vw, 96px)" }}
           >
-            See it before
+            <Scramble text="See it before" delay={350} />
             <br />
-            <span className="text-cobalt">it happens.</span>
+            <span className="text-cobalt">
+              <Scramble text="it happens." delay={750} />
+            </span>
           </motion.h1>
 
           <motion.p
