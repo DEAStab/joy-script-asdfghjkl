@@ -7,9 +7,11 @@ const ContactSchema = z.object({
   message: z.string().trim().min(1).max(5000),
 });
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const TO_ADDRESS = "reply@00bit.io";
-const FROM_ADDRESS = "Form Submission <reply@00bit.io>";
+const RESEND_API_URL = "https://api.resend.com/emails";
+// Where Request Access submissions are delivered.
+const TO_ADDRESSES = ["avivstabinsky@gmail.com", "reply@00bit.io"];
+// Sender must be on a domain verified in Resend (00bit.io).
+const FROM_ADDRESS = "00bit Request Access <reply@00bit.io>";
 const ACCEPTED_RESEND_KEYS = ["RESEND_API_KEY", "RESEND_API_KEY_2"] as const;
 
 function getEmailEnvironmentDiagnostics() {
@@ -17,14 +19,10 @@ function getEmailEnvironmentDiagnostics() {
   const relatedResendKeys = Object.keys(process.env)
     .filter((key) => key.toUpperCase().includes("RESEND"))
     .sort();
-  const missingEnvironmentVariables = [
-    ...(!process.env.LOVABLE_API_KEY ? ["LOVABLE_API_KEY"] : []),
-    ...(!resendKey ? ["RESEND_API_KEY or RESEND_API_KEY_2"] : []),
-  ];
 
   return {
     resendApiKey: resendKey ? process.env[resendKey] : undefined,
-    missingEnvironmentVariables,
+    missingEnvironmentVariables: resendKey ? [] : ["RESEND_API_KEY or RESEND_API_KEY_2"],
     expectedResendEnvironmentVariables: ACCEPTED_RESEND_KEYS,
     detectedResendEnvironmentVariables: relatedResendKeys,
     possibleMisnamedResendEnvironmentVariables: relatedResendKeys.filter(
@@ -50,10 +48,9 @@ export const Route = createFileRoute("/api/public/contact")({
         }
         const { email, message } = parsed.data;
 
-        const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
         const diagnostics = getEmailEnvironmentDiagnostics();
         const RESEND_API_KEY = diagnostics.resendApiKey;
-        if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
+        if (!RESEND_API_KEY) {
           console.error("Contact email environment validation failed", {
             missingEnvironmentVariables: diagnostics.missingEnvironmentVariables,
             detectedResendEnvironmentVariables: diagnostics.detectedResendEnvironmentVariables,
@@ -67,7 +64,7 @@ export const Route = createFileRoute("/api/public/contact")({
               expectedResendEnvironmentVariables: diagnostics.expectedResendEnvironmentVariables,
               detectedResendEnvironmentVariables: diagnostics.detectedResendEnvironmentVariables,
               possibleMisnamedResendEnvironmentVariables: diagnostics.possibleMisnamedResendEnvironmentVariables,
-              note: "Secret values are intentionally hidden. The Resend connector must expose RESEND_API_KEY, or a second linked Resend connector must expose RESEND_API_KEY_2.",
+              note: "Secret values are intentionally hidden. Set RESEND_API_KEY (your Resend API key) so the form can send via Resend.",
             },
             { status: 500 },
           );
@@ -80,7 +77,7 @@ export const Route = createFileRoute("/api/public/contact")({
 
         const html = `
           <div style="font-family:ui-monospace,Menlo,monospace;color:#0a0a0a;">
-            <p style="text-transform:uppercase;letter-spacing:0.24em;font-size:11px;color:#0047FF;margin:0 0 16px;">// new contact form message</p>
+            <p style="text-transform:uppercase;letter-spacing:0.24em;font-size:11px;color:#0047FF;margin:0 0 16px;">// new request access message</p>
             <p style="margin:0 0 8px;"><strong>From:</strong> ${escape(email)}</p>
             <p style="margin:0 0 8px;"><strong>Submitted:</strong> ${escape(submittedAt)}</p>
             <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
@@ -88,20 +85,19 @@ export const Route = createFileRoute("/api/public/contact")({
           </div>
         `;
 
-        const text = `New Contact Form Message\n\nFrom: ${email}\nSubmitted: ${submittedAt}\n\n${message}\n`;
+        const text = `New Request Access Message\n\nFrom: ${email}\nSubmitted: ${submittedAt}\n\n${message}\n`;
 
-        const res = await fetch(`${GATEWAY_URL}/emails`, {
+        const res = await fetch(RESEND_API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "X-Connection-Api-Key": RESEND_API_KEY,
+            Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
             from: FROM_ADDRESS,
-            to: [TO_ADDRESS],
+            to: TO_ADDRESSES,
             reply_to: email,
-            subject: "New Contact Form Message",
+            subject: `New Request Access message from ${email}`,
             html,
             text,
           }),
@@ -110,9 +106,15 @@ export const Route = createFileRoute("/api/public/contact")({
         if (!res.ok) {
           const detail = await res.text();
           console.error("Resend send failed", res.status, detail);
-          if (res.status === 403 && detail.includes("verify a domain")) {
+          if (res.status === 401 || res.status === 403) {
+            if (detail.includes("verify a domain") || detail.toLowerCase().includes("domain")) {
+              return Response.json(
+                { error: "Sender domain needs verification in Resend before messages can be sent" },
+                { status: 502 },
+              );
+            }
             return Response.json(
-              { error: "Sender domain needs verification before messages can be sent" },
+              { error: "Resend rejected the API key — check RESEND_API_KEY" },
               { status: 502 },
             );
           }
