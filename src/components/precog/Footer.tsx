@@ -16,7 +16,7 @@ export function Footer() {
             {["Algorithm", "Extending", "GitHub", "Contact"].map((l) => (
               <li key={l}>
                 <a
-                  href="#"
+                  href="/access"
                   className="font-mono-ui text-[11px] uppercase tracking-[0.28em] text-ink hover:text-cobalt transition-colors"
                 >
                   {l}
@@ -24,6 +24,7 @@ export function Footer() {
               </li>
             ))}
           </ul>
+
         </div>
       </div>
       <div className="h-px bg-cobalt w-full" />
