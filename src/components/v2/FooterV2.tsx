@@ -12,13 +12,16 @@ export function FooterV2() {
         </div>
         <div className="font-mono-ui text-[10px] uppercase tracking-[0.26em] text-ink-soft leading-[2.4]">
           <a href="#modules" className="link-rule block w-fit hover:text-ink transition-colors">
-            Instruments
+            Modules
           </a>
           <a href="#trace" className="link-rule block w-fit hover:text-ink transition-colors">
-            Simulation
+            Live demo
           </a>
-          <a href="#doctrine" className="link-rule block w-fit hover:text-ink transition-colors">
-            Doctrine
+          <a
+            href="#transparency"
+            className="link-rule block w-fit hover:text-ink transition-colors"
+          >
+            Transparency
           </a>
           <Link to="/access" className="link-rule block w-fit hover:text-ink transition-colors">
             Request access

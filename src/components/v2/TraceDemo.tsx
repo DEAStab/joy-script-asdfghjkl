@@ -44,21 +44,20 @@ export function TraceDemo() {
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-5">
           <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            03 / simulation
+            // 03 / Live demo
           </div>
           <h2
             className="font-display font-medium text-ink mt-5 leading-[1.02] tracking-[-0.03em] [text-wrap:balance]"
             style={{ fontSize: "clamp(34px, 3.6vw, 56px)" }}
           >
-            Run a trace. Watch it think.
+            Run a trace, step by step.
           </h2>
           <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[44ch]">
-            Drop any address — or run the canned case — and watch the engine narrate its own
-            reasoning, signal by signal. This is the level of explanation every real verdict ships
-            with.
+            Paste any address — or run the example case — and watch PreCog explain its reasoning,
+            signal by signal. Every real verdict ships with this level of explanation.
           </p>
           <p className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft/60 mt-8">
-            simulation · illustrative output only
+            Demo — illustrative output only
           </p>
         </div>
 
@@ -77,7 +76,7 @@ export function TraceDemo() {
               <input
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="0x84f3…c2e1 — paste an address or run the case file"
+                placeholder="0x84f3…c2e1 — paste an address, or run the example"
                 spellCheck={false}
                 className="flex-1 bg-transparent outline-none px-4 py-4 font-mono-ui text-[12px] md:text-[13px] text-ink placeholder:text-ink-soft/40"
                 aria-label="Address to trace"
@@ -94,14 +93,14 @@ export function TraceDemo() {
             <div className="px-5 md:px-6 py-5 font-mono-ui text-[11px] md:text-[12px] leading-[2.3] min-h-[240px]">
               {phase === "idle" && (
                 <div className="text-ink-soft/50">
-                  awaiting subject{" "}
+                  Enter an address to begin{" "}
                   <span className="caret-blink inline-block w-[7px] h-[12px] bg-cobalt align-middle" />
                 </div>
               )}
               {phase !== "idle" && (
                 <>
                   <div className="text-ink-soft/60">
-                    case file · subject <span className="text-ink">{subject}</span>
+                    Example trace · address <span className="text-ink">{subject}</span>
                   </div>
                   {STEPS.slice(0, step).map((s, i) => (
                     <div key={i} className="flex flex-wrap gap-x-3">

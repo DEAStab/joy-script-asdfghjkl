@@ -143,7 +143,7 @@ const MODULES: {
   viz: ReactNode;
 }[] = [
   {
-    index: "α",
+    index: "01",
     name: "ATLAS",
     tag: "exposure mapping",
     title: "Maps where the money has been.",
@@ -152,7 +152,7 @@ const MODULES: {
     viz: <NetworkCanvas density={6500} />,
   },
   {
-    index: "β",
+    index: "02",
     name: "TANGO",
     tag: "pattern detection",
     title: "Reads the rhythm of the chain.",
@@ -161,7 +161,7 @@ const MODULES: {
     viz: <TangoViz />,
   },
   {
-    index: "γ",
+    index: "03",
     name: "PEDIGRID",
     tag: "lineage tracing",
     title: "Traces the bloodline of an address.",
@@ -176,7 +176,7 @@ export function ModulesDeck() {
     <section id="modules">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 pt-24 pb-8">
         <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-          02 / instruments
+          // 02 / Modules
         </div>
         <h2
           className="font-display font-medium text-ink mt-5 leading-[1.0] tracking-[-0.03em] [text-wrap:balance]"
@@ -230,10 +230,10 @@ export function ModulesDeck() {
                 <div className="lg:col-span-6">
                   <div className="hud-frame bg-surface border border-muted-line h-[280px] md:h-[360px] relative">
                     <span className="absolute top-2.5 left-3.5 z-10 font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-                      {m.name.toLowerCase()}.render
+                      {m.name} / live view
                     </span>
                     <span className="absolute top-2.5 right-3.5 z-10 font-mono-ui text-[9px] uppercase tracking-[0.3em] text-cobalt">
-                      ● rec
+                      ● live
                     </span>
                     <div className="absolute inset-0 pt-8 pb-3 px-3">{m.viz}</div>
                   </div>

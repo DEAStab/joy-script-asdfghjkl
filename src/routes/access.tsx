@@ -8,7 +8,7 @@ export const Route = createFileRoute("/access")({
       { title: "Request Access — 00bit / PreCog" },
       {
         name: "description",
-        content: "Open a secure channel to the 00bit team and request access to PreCog.",
+        content: "Send a message to the 00bit team to request access to PreCog.",
       },
     ],
   }),
@@ -87,26 +87,30 @@ function AccessPage() {
             to="/"
             className="link-rule font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-cobalt transition-colors"
           >
-            ◂ return to console
+            ← Back
           </Link>
           <ThemeToggle />
         </div>
 
         <div className="mt-10 flex items-center gap-3 font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
           <span className="inline-block w-5 h-px bg-cobalt" />
-          00bit // secure channel
+          // 00bit / request access
         </div>
 
         <h1
-          className="font-display font-bold text-ink mt-6 leading-[1.0] tracking-[-0.03em] uppercase [text-wrap:balance]"
+          className="font-display font-medium text-ink mt-6 leading-[1.05] tracking-[-0.03em] [text-wrap:balance]"
           style={{ fontSize: "clamp(38px, 5.4vw, 68px)" }}
         >
-          Open a channel to <span className="text-cobalt">00bit</span>.
+          Message the{" "}
+          <span className="text-cobalt whitespace-nowrap">
+            <span className="zero-slashed">0</span>
+            <span className="zero-slashed">0</span>bit
+          </span>{" "}
+          team.
         </h1>
 
         <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[52ch]">
-          Tell us who you are and what you investigate. Access is granted per desk — a human reads
-          every transmission.
+          Tell us who you are and why you want access. We read every message.
         </p>
 
         {status === "sent" ? (
@@ -115,7 +119,7 @@ function AccessPage() {
             className="panel-rise hud-frame mt-12 border border-muted-line bg-surface p-8 md:p-10"
           >
             <div className="font-mono-ui text-[9px] uppercase tracking-[0.32em] text-signal">
-              ● transmission delivered
+              ● message delivered
             </div>
             <h2
               className="font-display font-medium text-ink mt-4 leading-[1.1]"
@@ -135,7 +139,7 @@ function AccessPage() {
               onClick={reset}
               className="link-rule mt-7 font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-cobalt transition-colors"
             >
-              Send another transmission
+              Send another message
             </button>
           </section>
         ) : (
@@ -147,17 +151,17 @@ function AccessPage() {
           >
             <div className="flex items-center justify-between px-5 py-3 border-b border-muted-line">
               <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-                channel.request
+                Request access
               </span>
-              <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-cobalt">
-                ● encrypted in transit
+              <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft/60">
+                We reply within 1–2 days
               </span>
             </div>
 
             <div className="p-6 md:p-8 flex flex-col gap-8">
               <label className="group flex flex-col gap-3">
                 <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft group-focus-within:text-cobalt transition-colors">
-                  reply-to address
+                  Your email
                 </span>
                 <input
                   type="email"
@@ -176,14 +180,14 @@ function AccessPage() {
                 />
                 {emailInvalid && (
                   <span className="font-mono-ui text-[9px] uppercase tracking-[0.22em] text-threat">
-                    enter a valid email address
+                    Enter a valid email address
                   </span>
                 )}
               </label>
 
               <label className="group flex flex-col gap-3">
                 <span className="flex items-baseline justify-between font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft group-focus-within:text-cobalt transition-colors">
-                  transmission
+                  Message
                   <span
                     className={`tracking-[0.12em] tabular-nums transition-colors ${nearLimit ? "text-threat" : "text-ink-soft/50"}`}
                   >
@@ -207,7 +211,7 @@ function AccessPage() {
                 />
                 {messageInvalid && (
                   <span className="font-mono-ui text-[9px] uppercase tracking-[0.22em] text-threat">
-                    a message is required
+                    A message is required
                   </span>
                 )}
               </label>
@@ -237,7 +241,7 @@ function AccessPage() {
                       className="inline-block w-3 h-3 border-2 border-white/35 border-t-white animate-spin"
                     />
                   )}
-                  {status === "sending" ? "transmitting…" : "transmit"}
+                  {status === "sending" ? "Sending…" : "Send message"}
                 </button>
                 {status === "error" && (
                   <span

@@ -3,10 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
-  { label: "Feed", href: "#feed" },
+  { label: "Live feed", href: "#feed" },
   { label: "Modules", href: "#modules" },
-  { label: "Trace", href: "#trace" },
-  { label: "Doctrine", href: "#doctrine" },
+  { label: "Live demo", href: "#trace" },
+  { label: "Transparency", href: "#transparency" },
 ];
 
 function useUtcClock() {
@@ -55,7 +55,7 @@ export function NavV2() {
             00bit
           </span>
           <span className="hidden sm:inline font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-            / precog v2
+            / PreCog
           </span>
         </a>
 
@@ -72,9 +72,9 @@ export function NavV2() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden md:flex items-center gap-2 font-mono-ui text-[10px] tracking-[0.2em] text-ink-soft tabular-nums">
+          <span className="hidden md:flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[0.2em] text-ink-soft tabular-nums">
             <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-            SYS:ONLINE · {clock} UTC
+            Live · {clock} UTC
           </span>
           <ThemeToggle />
           <Link

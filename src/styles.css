@@ -353,6 +353,23 @@ html.theme-transition *::after {
   clip-path: inset(0 0 0 0);
 }
 
+/* ——— slashed zero for the 00bit wordmark ——— */
+.zero-slashed {
+  position: relative;
+  display: inline-block;
+}
+.zero-slashed::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.58em;
+  height: 0.045em;
+  min-height: 1.5px;
+  background: currentColor;
+  transform: translate(-50%, -50%) rotate(-56deg);
+}
+
 /* ——— pointer accent ring (native cursor stays visible) ——— */
 .cursor-ring {
   position: fixed;

@@ -92,17 +92,17 @@ export function LiveFeed() {
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-4">
           <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            01 / live wire
+            // 01 / Live feed
           </div>
           <h2
             className="font-display font-medium text-ink mt-5 leading-[1.02] tracking-[-0.03em] [text-wrap:balance]"
             style={{ fontSize: "clamp(34px, 3.6vw, 56px)" }}
           >
-            The chain never sleeps. Neither does the watcher.
+            Detection, in real time.
           </h2>
           <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[44ch]">
-            Every block, on every indexed chain, scored as it lands. This is a live rendering of the
-            detection stream — patterns named the moment they form.
+            Every block on every indexed chain is scored as it lands. This is a live rendering of
+            the detection stream — each pattern identified and named the moment it forms.
           </p>
         </div>
 
@@ -110,11 +110,11 @@ export function LiveFeed() {
           <div className="hud-frame bg-surface border border-muted-line">
             <div className="flex items-center justify-between px-5 py-3 border-b border-muted-line">
               <span className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-                detections.stream — illustrative
+                Detection stream — illustrative example
               </span>
               <span className="flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[0.3em] text-signal">
                 <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-                streaming
+                live
               </span>
             </div>
             <div className="px-5 py-5 font-mono-ui text-[11px] md:text-[12px] leading-[2.2] min-h-[280px]">

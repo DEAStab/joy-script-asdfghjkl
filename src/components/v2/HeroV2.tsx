@@ -35,27 +35,29 @@ export function HeroV2() {
           className="flex items-center gap-3 font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt"
         >
           <span className="inline-block w-5 h-px bg-cobalt" />
-          00bit // precog v2.0 — blockchain intelligence
+          // 00bit / PreCog — blockchain intelligence
         </motion.div>
 
         <motion.h1
           {...rise(0.25)}
-          className="font-display font-bold text-ink mt-8 leading-[0.96] tracking-[-0.035em] uppercase"
-          style={{ fontSize: "clamp(46px, 9vw, 140px)" }}
+          className="font-display font-medium text-ink mt-8 leading-[1.02] tracking-[-0.03em]"
+          style={{ fontSize: "clamp(42px, 6.5vw, 100px)" }}
         >
-          <Scramble text="See it before" delay={400} />
-          <br />
+          <Scramble text="Detect the " delay={400} />
           <span className="text-cobalt">
-            <Scramble text="it happens." delay={900} />
+            <Scramble text="signal" delay={700} />
           </span>
+          <Scramble text="." delay={950} />
+          <br />
+          <Scramble text="Before the noise becomes the story." delay={1000} />
         </motion.h1>
 
         <motion.p
           {...rise(0.45)}
           className="text-ink-soft mt-9 text-[16px] md:text-[17px] leading-relaxed max-w-[54ch]"
         >
-          PreCog watches every chain at once — scoring wallets, naming laundering patterns, and
-          surfacing the evidence before the headline writes itself.
+          PreCog is the blockchain intelligence layer for analysts who refuse to wait for the
+          headline.
         </motion.p>
 
         <motion.div {...rise(0.6)} className="mt-11 flex flex-wrap items-center gap-5">
@@ -69,7 +71,7 @@ export function HeroV2() {
             href="#trace"
             className="hud-frame font-mono-ui text-[11px] uppercase tracking-[0.28em] text-ink border border-muted-line px-7 py-4 hover:text-cobalt hover:border-cobalt transition-colors"
           >
-            Run a trace ▸
+            See it in action ▸
           </a>
         </motion.div>
 
@@ -84,11 +86,11 @@ export function HeroV2() {
             <span className="text-ink">6</span> chains live
           </span>
           <span>
-            <span className="text-ink">&lt;3s</span> median verdict
+            <span className="text-ink">&lt;3s</span> median score time
           </span>
           <span className="flex items-center gap-2">
             <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-            signal channel operational
+            live signal channel · operational
           </span>
         </motion.div>
       </div>
