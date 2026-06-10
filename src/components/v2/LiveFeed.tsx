@@ -88,7 +88,7 @@ export function LiveFeed() {
   }, []);
 
   return (
-    <section id="feed" className="border-b border-muted-line">
+    <section id="feed" className="border-y border-muted-line">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-4">
           <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">

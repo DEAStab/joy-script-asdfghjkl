@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CursorReticle } from "@/components/v2/CursorReticle";
 import { NavV2 } from "@/components/v2/NavV2";
 import { HeroV2 } from "@/components/v2/HeroV2";
-import { Ticker } from "@/components/v2/Ticker";
 import { LiveFeed } from "@/components/v2/LiveFeed";
 import { ModulesDeck } from "@/components/v2/ModulesDeck";
 import { TraceDemo } from "@/components/v2/TraceDemo";
@@ -36,7 +35,6 @@ function Index() {
       <div className="scanlines fixed inset-0 z-[80]" aria-hidden="true" />
       <NavV2 />
       <HeroV2 />
-      <Ticker />
       <LiveFeed />
       <ModulesDeck />
       <TraceDemo />

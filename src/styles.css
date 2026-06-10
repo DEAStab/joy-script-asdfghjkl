@@ -277,21 +277,6 @@ html.theme-transition *::after {
   background-size: 100% 1px;
 }
 
-/* ——— market-tape ticker ——— */
-@keyframes ticker-roll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-.ticker-track {
-  display: inline-flex;
-  animation: ticker-roll 36s linear infinite;
-  will-change: transform;
-}
-.ticker-track:hover {
-  animation-play-state: paused;
-}
-
 /* ——— blinking terminal caret ——— */
 @keyframes caret-blink {
   0%,
@@ -413,7 +398,6 @@ html.theme-transition *::after {
 @media (prefers-reduced-motion: reduce) {
   .form-shake,
   .panel-rise,
-  .ticker-track,
   .caret-blink,
   .online-pulse,
   .threat-ring,
