@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 export function CtaSection() {
   return (
-    <section className="relative overflow-hidden">
+    <section id="request" className="relative overflow-hidden">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-28 md:py-36 text-center">
         <div className="font-body text-[12px] font-semibold uppercase tracking-[0.08em] text-cobalt">
           05 — Request access

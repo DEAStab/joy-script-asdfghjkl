@@ -7,6 +7,7 @@ import { TraceDemo } from "@/components/v2/TraceDemo";
 import { Doctrine } from "@/components/v2/Doctrine";
 import { CtaSection } from "@/components/v2/CtaSection";
 import { FooterV2 } from "@/components/v2/FooterV2";
+import { StickyAccess } from "@/components/v2/StickyAccess";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,6 +39,7 @@ function Index() {
       <Doctrine />
       <CtaSection />
       <FooterV2 />
+      <StickyAccess />
     </main>
   );
 }
