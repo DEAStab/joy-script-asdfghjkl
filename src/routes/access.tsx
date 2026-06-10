@@ -5,40 +5,16 @@ export const Route = createFileRoute("/access")({
   head: () => ({
     meta: [
       { title: "Request Access — 00bit / PreCog" },
-      { name: "description", content: "Send a message to the 00bit team to request access to PreCog." },
+      {
+        name: "description",
+        content: "Send a message to the 00bit team to request access to PreCog.",
+      },
     ],
   }),
   component: AccessPage,
 });
 
 type Status = "idle" | "sending" | "sent" | "error";
-
-type ContactErrorResponse = {
-  error?: string;
-  missingEnvironmentVariables?: string[];
-  expectedResendEnvironmentVariables?: readonly string[];
-  detectedResendEnvironmentVariables?: string[];
-  possibleMisnamedResendEnvironmentVariables?: string[];
-  note?: string;
-};
-
-function formatContactError(data: ContactErrorResponse) {
-  const details = [
-    data.error,
-    data.missingEnvironmentVariables?.length
-      ? `Missing: ${data.missingEnvironmentVariables.join(", ")}`
-      : undefined,
-    data.detectedResendEnvironmentVariables?.length
-      ? `Detected Resend vars: ${data.detectedResendEnvironmentVariables.join(", ")}`
-      : "Detected Resend vars: none",
-    data.possibleMisnamedResendEnvironmentVariables?.length
-      ? `Possible misnamed vars: ${data.possibleMisnamedResendEnvironmentVariables.join(", ")}`
-      : undefined,
-    data.note,
-  ].filter(Boolean);
-
-  return details.join(" — ") || "Failed to send";
-}
 
 function AccessPage() {
   const [email, setEmail] = useState("");
@@ -57,18 +33,25 @@ function AccessPage() {
         body: JSON.stringify({ email, message }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({} as ContactErrorResponse));
-        throw new Error(formatContactError(data));
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(
+          typeof data.error === "string" && data.error
+            ? data.error
+            : "Something went wrong. Please try again.",
+        );
       }
       setStatus("sent");
       setEmail("");
       setMessage("");
     } catch (err) {
       setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Failed to send");
+      setErrorMsg(
+        err instanceof Error && err.message
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     }
   };
-
 
   return (
     <main className="bg-base text-ink min-h-screen px-6 md:px-10 py-16">
@@ -88,7 +71,9 @@ function AccessPage() {
           className="font-display text-ink mt-6 leading-[1.05] tracking-[-0.02em]"
           style={{ fontSize: "clamp(40px, 5vw, 64px)" }}
         >
-          Message the <em className="italic text-cobalt">00bit</em> team.
+          Message the{" "}
+          <span className="font-mono-ui not-italic text-cobalt tracking-[-0.01em]">00bit</span>{" "}
+          team.
         </h1>
 
         <p className="font-body text-ink-soft mt-6 text-[16px] leading-relaxed">
