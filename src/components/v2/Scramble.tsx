@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 const GLYPHS = "!<>-_\\/[]{}—=+*^?#@$01";
 
 /**
- * Decode effect: characters resolve left-to-right out of glyph noise.
- * Renders the final text immediately under prefers-reduced-motion.
+ * Decode effect: the text resolves out of random glyph noise, left to right.
+ * The visible span starts empty and "loads in"; a visually-hidden copy carries
+ * the real text for SEO and screen readers. Renders instantly (no scramble)
+ * under prefers-reduced-motion.
  */
 export function Scramble({
   text,
@@ -17,15 +19,14 @@ export function Scramble({
   delay?: number;
   speed?: number;
 }) {
-  // Render the real text by default (SSR/no-JS safe); the decode only
-  // ever replaces it with same-length glyph noise, so layout never shifts.
-  const [out, setOut] = useState(text);
+  const [out, setOut] = useState("");
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setOut(text);
       return;
     }
+    setOut("");
     let frame = 0;
     let interval: ReturnType<typeof setInterval>;
     const timeout = setTimeout(() => {
@@ -51,7 +52,8 @@ export function Scramble({
   }, [text, delay, speed]);
 
   return (
-    <span className={className} aria-label={text}>
+    <span className={className}>
+      <span className="sr-only">{text}</span>
       <span aria-hidden="true">{out}</span>
     </span>
   );
