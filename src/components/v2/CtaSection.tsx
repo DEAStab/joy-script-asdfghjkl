@@ -5,7 +5,7 @@ export function CtaSection() {
     <section className="relative overflow-hidden">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-28 md:py-36 text-center">
         <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-          // 05 / Request access
+          05 / clearance
         </div>
         <Link to="/access" className="block mt-8 group" aria-label="Request access">
           <span
@@ -23,13 +23,14 @@ export function CtaSection() {
           </span>
         </Link>
         <p className="text-ink-soft mt-10 text-[15px] max-w-[44ch] mx-auto leading-relaxed">
-          Tell us who you are and why you want access. We read every message.
+          Access is granted per desk, not per seat. Tell us what you investigate — a human reads
+          every request.
         </p>
         <Link
           to="/access"
           className="inline-block mt-10 font-mono-ui text-[11px] uppercase tracking-[0.28em] bg-cobalt text-white px-8 py-4 hover:bg-[var(--cobalt-press)] hover:-translate-y-px active:translate-y-0 transition-[transform,background-color] duration-200"
         >
-          Send a message →
+          Open a channel →
         </Link>
       </div>
     </section>

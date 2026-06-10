@@ -48,7 +48,7 @@
   --base: #e9edf4; /* cool light blue-grey */
   --surface: #ffffff;
   --ink: #0b1120; /* near-black navy */
-  --ink-soft: #55617a;
+  --ink-soft: #3a4660; /* dark slate — secondary text stays clearly readable */
   --cobalt: #0b46e6; /* deeper cobalt for AA contrast on light */
   --cobalt-fill: #0047ff; /* brand cobalt for solid fills */
   --cobalt-press: #0036c4;
@@ -99,7 +99,7 @@
   --base: #05070b; /* near-black blue */
   --surface: #0a0e16; /* raised panel */
   --ink: #e8ecf4;
-  --ink-soft: #8a93a6;
+  --ink-soft: #a3adc2; /* brighter slate — secondary text stays clearly readable */
   --cobalt: #4d7dff; /* readable electric cobalt on dark */
   --cobalt-fill: #0047ff;
   --cobalt-press: #0036c4;

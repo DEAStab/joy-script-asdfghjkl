@@ -2,11 +2,11 @@ import { Link } from "@tanstack/react-router";
 
 export function Doctrine() {
   return (
-    <section id="transparency" className="border-b border-muted-line">
+    <section id="doctrine" className="border-b border-muted-line">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-6">
           <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            // 04 / Transparency
+            04 / doctrine
           </div>
           <h2
             className="font-display font-medium text-ink mt-5 leading-[1.0] tracking-[-0.03em] [text-wrap:balance]"
