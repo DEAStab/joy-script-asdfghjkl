@@ -40,7 +40,8 @@ export const Route = createFileRoute("/api/public/contact")({
           }
           const { email, message } = parsed.data;
 
-          const apiKey = process.env.RESEND_API_KEY;
+          // Trim so a stray space/newline from pasting the secret can't trigger a false 401.
+          const apiKey = process.env.RESEND_API_KEY?.trim();
           if (!apiKey) {
             console.error("RESEND_API_KEY is not set — cannot send Request Access email.");
             return Response.json(
