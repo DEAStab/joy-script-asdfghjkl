@@ -50,12 +50,12 @@ export function NavV2() {
       }
     >
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 h-16 flex items-center justify-between gap-6">
-        <a href="#top" className="flex items-baseline gap-3">
-          <span className="font-mono-ui lowercase text-ink font-medium text-[15px] tracking-[0.18em]">
+        <a href="#top" className="flex items-baseline gap-2.5">
+          <span className="font-mono-ui lowercase text-ink font-semibold text-[16px] tracking-[0.08em]">
             00bit
           </span>
-          <span className="hidden sm:inline font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-            / precog v2
+          <span className="hidden sm:inline font-body text-[12px] font-medium text-ink-soft">
+            / PreCog
           </span>
         </a>
 
@@ -64,7 +64,7 @@ export function NavV2() {
             <a
               key={l.label}
               href={l.href}
-              className="link-rule font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-ink transition-colors"
+              className="link-rule font-body text-[13.5px] font-medium text-ink-soft hover:text-ink transition-colors"
             >
               {l.label}
             </a>
@@ -72,14 +72,14 @@ export function NavV2() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden md:flex items-center gap-2 font-mono-ui text-[10px] tracking-[0.2em] text-ink-soft tabular-nums">
+          <span className="hidden md:flex items-center gap-2 font-body text-[12.5px] font-medium text-ink-soft">
             <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-            SYS:ONLINE · {clock} UTC
+            Live · <span className="font-mono-ui text-[11.5px] tabular-nums">{clock} UTC</span>
           </span>
           <ThemeToggle />
           <Link
             to="/access"
-            className="hud-frame font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink border border-muted-line px-4 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
+            className="hud-frame font-body text-[13px] font-semibold text-ink border border-muted-line px-5 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
           >
             Request access
           </Link>
