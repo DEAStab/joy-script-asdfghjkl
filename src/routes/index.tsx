@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CursorReticle } from "@/components/v2/CursorReticle";
 import { NavV2 } from "@/components/v2/NavV2";
-import { HeroV2 } from "@/components/v2/HeroV2";
-import { LiveFeed } from "@/components/v2/LiveFeed";
-import { ModulesDeck } from "@/components/v2/ModulesDeck";
-import { TraceDemo } from "@/components/v2/TraceDemo";
-import { Doctrine } from "@/components/v2/Doctrine";
-import { CtaSection } from "@/components/v2/CtaSection";
+import { HeroSaas } from "@/components/v2/HeroSaas";
+import { StatBand } from "@/components/v2/StatBand";
+import { ModulesGrid } from "@/components/v2/ModulesGrid";
+import { DemoSection } from "@/components/v2/DemoSection";
+import { Methodology } from "@/components/v2/Methodology";
+import { CtaBand } from "@/components/v2/CtaBand";
 import { FooterV2 } from "@/components/v2/FooterV2";
 
 export const Route = createFileRoute("/")({
@@ -21,7 +20,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "PreCog — Blockchain intelligence by 00bit" },
       {
         property: "og:description",
-        content: "See it before it happens. Multi-chain risk scoring with auditable evidence.",
+        content:
+          "Blockchain intelligence that shows its work. Multi-chain risk scoring with auditable evidence.",
       },
     ],
   }),
@@ -30,16 +30,14 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <main className="bg-base text-ink relative">
-      <CursorReticle />
-      <div className="scanlines fixed inset-0 z-[80]" aria-hidden="true" />
+    <main id="top" className="bg-base text-ink">
       <NavV2 />
-      <HeroV2 />
-      <LiveFeed />
-      <ModulesDeck />
-      <TraceDemo />
-      <Doctrine />
-      <CtaSection />
+      <HeroSaas />
+      <StatBand />
+      <ModulesGrid />
+      <DemoSection />
+      <Methodology />
+      <CtaBand />
       <FooterV2 />
     </main>
   );

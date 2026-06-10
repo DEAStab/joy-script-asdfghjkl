@@ -79,7 +79,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       aria-label={`Switch to ${isLight ? "dark" : "light"} theme`}
       aria-pressed={isLight}
       title={`Switch to ${isLight ? "dark" : "light"} theme`}
-      className={`hud-frame inline-flex items-center justify-center w-9 h-9 border border-muted-line text-ink-soft hover:text-cobalt hover:border-cobalt transition-colors ${className}`}
+      className={`inline-flex items-center justify-center w-9 h-9 border border-muted-line text-ink-soft hover:text-cobalt hover:border-cobalt transition-colors ${className}`}
     >
       {isLight ? <MoonIcon /> : <SunIcon />}
     </button>

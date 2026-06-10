@@ -3,10 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
-  { label: "Feed", href: "#feed" },
+  { label: "Product", href: "#product" },
   { label: "Modules", href: "#modules" },
-  { label: "Trace", href: "#trace" },
-  { label: "Doctrine", href: "#doctrine" },
+  { label: "Demo", href: "#demo" },
+  { label: "Methodology", href: "#methodology" },
 ];
 
 function useUtcClock() {
@@ -49,7 +49,7 @@ export function NavV2() {
           : undefined
       }
     >
-      <div className="max-w-[1500px] mx-auto px-5 md:px-10 h-16 flex items-center justify-between gap-6">
+      <div className="max-w-[1200px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between gap-6">
         <a href="#top" className="flex items-baseline gap-2.5">
           <span className="font-mono-ui lowercase text-ink font-semibold text-[16px] tracking-[0.08em]">
             00bit
@@ -72,14 +72,13 @@ export function NavV2() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden md:flex items-center gap-2 font-body text-[12.5px] font-medium text-ink-soft">
-            <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
-            Live · <span className="font-mono-ui text-[11.5px] tabular-nums">{clock} UTC</span>
+          <span className="hidden md:inline font-mono-ui text-[11.5px] tabular-nums text-ink-soft/70">
+            {clock} UTC
           </span>
           <ThemeToggle />
           <Link
             to="/access"
-            className="hud-frame font-body text-[13px] font-semibold text-ink border border-muted-line px-5 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
+            className="font-body text-[13px] font-semibold bg-cobalt text-white px-5 py-2.5 hover:bg-[var(--cobalt-press)] transition-colors"
           >
             Request access
           </Link>
