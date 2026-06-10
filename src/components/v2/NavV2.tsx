@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
   { label: "Feed", href: "#feed" },
@@ -70,11 +71,12 @@ export function NavV2() {
           ))}
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           <span className="hidden md:flex items-center gap-2 font-mono-ui text-[10px] tracking-[0.2em] text-ink-soft tabular-nums">
             <span className="online-pulse inline-block w-1.5 h-1.5 bg-[var(--signal)]" />
             SYS:ONLINE · {clock} UTC
           </span>
+          <ThemeToggle />
           <Link
             to="/access"
             className="hud-frame font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink border border-muted-line px-4 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"

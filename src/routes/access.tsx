@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
+import { ThemeToggle } from "@/components/v2/ThemeToggle";
 
 export const Route = createFileRoute("/access")({
   head: () => ({
@@ -81,12 +82,15 @@ function AccessPage() {
     <main className="bg-base text-ink min-h-screen px-5 md:px-10 py-14 grid-bg">
       <div className="scanlines fixed inset-0 z-[80] pointer-events-none" aria-hidden="true" />
       <div className="max-w-[680px] mx-auto relative">
-        <Link
-          to="/"
-          className="link-rule font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-cobalt transition-colors"
-        >
-          ◂ return to console
-        </Link>
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            to="/"
+            className="link-rule font-mono-ui text-[10px] uppercase tracking-[0.28em] text-ink-soft hover:text-cobalt transition-colors"
+          >
+            ◂ return to console
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <div className="mt-10 flex items-center gap-3 font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
           <span className="inline-block w-5 h-px bg-cobalt" />

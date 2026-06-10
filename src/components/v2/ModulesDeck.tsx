@@ -31,9 +31,25 @@ function TangoViz() {
         fan-out burst
       </text>
       <g className="scan-beam">
-        <line x1="0" y1="0" x2="0" y2="180" stroke="rgba(77,125,255,0.5)" strokeWidth="1" />
+        <line
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="180"
+          stroke="var(--cobalt)"
+          strokeOpacity="0.5"
+          strokeWidth="1"
+        />
       </g>
-      <line x1="0" y1="160" x2="560" y2="160" stroke="rgba(232,236,244,0.15)" strokeWidth="0.5" />
+      <line
+        x1="0"
+        y1="160"
+        x2="560"
+        y2="160"
+        stroke="var(--ink-soft)"
+        strokeOpacity="0.35"
+        strokeWidth="0.5"
+      />
       <text x="4" y="174" fontSize="9" fill="var(--ink-soft)" fontFamily="IBM Plex Mono, monospace">
         tx cadence · 24h window
       </text>
@@ -68,7 +84,8 @@ function PedigridViz() {
           y1={nodes[a].y}
           x2={nodes[b].x}
           y2={nodes[b].y}
-          stroke={hot ? "var(--threat)" : "rgba(232,236,244,0.3)"}
+          stroke={hot ? "var(--threat)" : "var(--ink-soft)"}
+          strokeOpacity={hot ? 1 : 0.4}
           strokeWidth={hot ? 1.2 : 0.8}
           strokeDasharray={hot ? "none" : "3 3"}
         />
@@ -79,7 +96,7 @@ function PedigridViz() {
             cx={n.x}
             cy={n.y}
             r={i === 0 ? 5 : 3.5}
-            fill={n.hot ? "var(--threat)" : i === 0 ? "var(--cobalt)" : "rgba(232,236,244,0.65)"}
+            fill={n.hot ? "var(--threat)" : i === 0 ? "var(--cobalt)" : "var(--ink-soft)"}
           />
           {n.hot && (
             <circle

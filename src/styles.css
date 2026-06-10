@@ -37,10 +37,14 @@
   --font-body: "Space Grotesk", sans-serif;
 }
 
-:root {
+/* ===================================================================
+   THEME: dark console (default) — applied at :root and data-theme=dark
+   =================================================================== */
+:root,
+:root[data-theme="dark"] {
   --radius: 0;
+  color-scheme: dark;
 
-  /* ——— intelligence console palette ——— */
   --base: #05070b; /* near-black blue */
   --surface: #0a0e16; /* raised panel */
   --ink: #e8ecf4;
@@ -48,10 +52,23 @@
   --cobalt: #4d7dff; /* readable electric cobalt on dark */
   --cobalt-fill: #0047ff; /* brand cobalt for solid fills */
   --cobalt-press: #0036c4;
+  --cobalt-rgb: 77, 125, 255;
   --signal: #3cf59a; /* system-online green */
   --threat: #ff5c5c; /* flagged red */
   --muted-line: rgba(232, 236, 244, 0.12);
   --panel-soft: #0d1320;
+
+  /* surfaces composed with alpha */
+  --base-rgb: 5, 7, 11;
+  --grid-line: rgba(232, 236, 244, 0.035);
+  --scanline: rgba(232, 236, 244, 0.022);
+
+  /* network-canvas palette (comma rgb triplets) */
+  --net-edge: 77, 125, 255;
+  --net-edge-threat: 255, 92, 92;
+  --net-node: 190, 205, 235;
+  --net-node-threat: 255, 92, 92;
+  --net-pulse: 141, 175, 255;
 
   --background: var(--base);
   --foreground: var(--ink);
@@ -71,6 +88,38 @@
   --border: var(--muted-line);
   --input: var(--muted-line);
   --ring: var(--cobalt);
+}
+
+/* ===================================================================
+   THEME: light console — "blueprint on paper"
+   =================================================================== */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --base: #e9edf4; /* cool light blue-grey */
+  --surface: #ffffff;
+  --ink: #0b1120; /* near-black navy */
+  --ink-soft: #55617a;
+  --cobalt: #0b46e6; /* deeper cobalt for AA contrast on light */
+  --cobalt-fill: #0047ff;
+  --cobalt-press: #0036c4;
+  --cobalt-rgb: 11, 70, 230;
+  --signal: #0a8f55; /* darker green, legible on light */
+  --threat: #d62828;
+  --muted-line: rgba(11, 17, 32, 0.16);
+  --panel-soft: #dde3ef;
+
+  --base-rgb: 233, 237, 244;
+  --grid-line: rgba(11, 17, 32, 0.05);
+  --scanline: rgba(11, 17, 32, 0.018);
+
+  --net-edge: 0, 71, 255;
+  --net-edge-threat: 200, 30, 30;
+  --net-node: 40, 54, 86;
+  --net-node-threat: 200, 30, 30;
+  --net-pulse: 0, 71, 255;
+
+  --accent-foreground: #ffffff;
 }
 
 @layer base {
@@ -104,6 +153,19 @@
       scroll-behavior: auto;
     }
   }
+}
+
+/* smooth cross-fade only during a theme flip (added/removed by the toggle) */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease,
+    fill 0.4s ease,
+    stroke 0.4s ease !important;
 }
 
 @layer utilities {
@@ -154,8 +216,8 @@
 /* ——— blueprint grid surface ——— */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(232, 236, 244, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(232, 236, 244, 0.035) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
@@ -164,8 +226,8 @@
   pointer-events: none;
   background: repeating-linear-gradient(
     0deg,
-    rgba(232, 236, 244, 0.022) 0px,
-    rgba(232, 236, 244, 0.022) 1px,
+    var(--scanline) 0px,
+    var(--scanline) 1px,
     transparent 1px,
     transparent 3px
   );
@@ -306,18 +368,22 @@
   clip-path: inset(0 0 0 0);
 }
 
-/* ——— custom cursor ——— */
-@media (pointer: fine) {
-  body.reticle,
-  body.reticle a,
-  body.reticle button,
-  body.reticle [role="button"] {
-    cursor: none;
-  }
-  body.reticle input,
-  body.reticle textarea {
-    cursor: text;
-  }
+/* ——— pointer accent ring (native cursor stays visible) ——— */
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 1.5px solid var(--cobalt);
+  border-radius: 50% !important;
+  box-shadow: 0 0 10px rgba(var(--cobalt-rgb), 0.45);
+  background: rgba(var(--cobalt-rgb), 0.06);
+  pointer-events: none;
+  z-index: 90;
+  opacity: 0;
+  will-change: transform, opacity;
 }
 
 @keyframes form-shake {

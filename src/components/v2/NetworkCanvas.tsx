@@ -34,6 +34,26 @@ export function NetworkCanvas({
     const mouse = { x: -9999, y: -9999 };
     const EDGE = 150;
 
+    // palette read from the active theme (comma rgb triplets)
+    const palette = {
+      edge: "77,125,255",
+      edgeThreat: "255,92,92",
+      node: "190,205,235",
+      nodeThreat: "255,92,92",
+      pulse: "141,175,255",
+    };
+    const readPalette = () => {
+      const cs = getComputedStyle(document.documentElement);
+      const get = (name: string, fallback: string) =>
+        cs.getPropertyValue(name).trim().replace(/\s+/g, "") || fallback;
+      palette.edge = get("--net-edge", palette.edge);
+      palette.edgeThreat = get("--net-edge-threat", palette.edgeThreat);
+      palette.node = get("--net-node", palette.node);
+      palette.nodeThreat = get("--net-node-threat", palette.nodeThreat);
+      palette.pulse = get("--net-pulse", palette.pulse);
+    };
+    readPalette();
+
     const seed = () => {
       const count = Math.max(24, Math.min(140, Math.floor((W * H) / density)));
       nodes = Array.from({ length: count }, () => ({
@@ -70,7 +90,9 @@ export function NetworkCanvas({
           if (d < EDGE) {
             const a = (1 - d / EDGE) * 0.28;
             ctx.strokeStyle =
-              nodes[i].hot || nodes[j].hot ? `rgba(255,92,92,${a * 0.9})` : `rgba(77,125,255,${a})`;
+              nodes[i].hot || nodes[j].hot
+                ? `rgba(${palette.edgeThreat},${a * 0.9})`
+                : `rgba(${palette.edge},${a})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -80,7 +102,7 @@ export function NetworkCanvas({
         }
       }
       // pulses
-      ctx.fillStyle = "rgba(141,175,255,0.95)";
+      ctx.fillStyle = `rgba(${palette.pulse},0.95)`;
       for (const p of pulses) {
         const a = nodes[p.a];
         const b = nodes[p.b];
@@ -92,7 +114,7 @@ export function NetworkCanvas({
       }
       // nodes
       for (const n of nodes) {
-        ctx.fillStyle = n.hot ? "rgba(255,92,92,0.9)" : "rgba(190,205,235,0.8)";
+        ctx.fillStyle = n.hot ? `rgba(${palette.nodeThreat},0.9)` : `rgba(${palette.node},0.8)`;
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
         ctx.fill();
@@ -158,6 +180,12 @@ export function NetworkCanvas({
     const onVis = () => start();
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("pointermove", onMove, { passive: true });
+    // re-read colors and repaint immediately when the theme flips
+    const onTheme = () => {
+      readPalette();
+      draw();
+    };
+    window.addEventListener("themechange", onTheme);
 
     resize();
     start();
@@ -168,6 +196,7 @@ export function NetworkCanvas({
       io.disconnect();
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("themechange", onTheme);
     };
   }, [density]);
 
