@@ -43,27 +43,27 @@ export function TraceDemo() {
     <section id="trace" className="border-y border-muted-line grid-bg">
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-5">
-          <div className="font-mono-ui text-[10px] uppercase tracking-[0.32em] text-cobalt">
-            03 / simulation
+          <div className="font-body text-[12px] font-semibold uppercase tracking-[0.08em] text-cobalt">
+            03 — Interactive demo
           </div>
           <h2
             className="font-display font-medium text-ink mt-5 leading-[1.02] tracking-[-0.03em] [text-wrap:balance]"
             style={{ fontSize: "clamp(34px, 3.6vw, 56px)" }}
           >
-            Run a trace. Watch it think.
+            Run a trace, step by step.
           </h2>
           <p className="text-ink-soft mt-6 text-[15px] leading-relaxed max-w-[44ch]">
             Drop any address — or run the canned case — and watch the engine narrate its own
             reasoning, signal by signal. This is the level of explanation every real verdict ships
             with.
           </p>
-          <p className="font-mono-ui text-[9px] uppercase tracking-[0.3em] text-ink-soft/60 mt-8">
-            simulation · illustrative output only
+          <p className="font-body text-[12px] font-medium tracking-[0.02em] text-ink-soft/70 mt-8">
+            Demo — illustrative output only
           </p>
         </div>
 
         <div className="lg:col-span-7">
-          <div className="hud-frame bg-surface border border-muted-line">
+          <div className="bg-surface border border-muted-line">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -77,7 +77,7 @@ export function TraceDemo() {
               <input
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="0x84f3…c2e1 — paste an address or run the case file"
+                placeholder="0x84f3…c2e1 — paste an address or run the example"
                 spellCheck={false}
                 className="flex-1 bg-transparent outline-none px-4 py-4 font-mono-ui text-[12px] md:text-[13px] text-ink placeholder:text-ink-soft/40"
                 aria-label="Address to trace"
@@ -85,23 +85,23 @@ export function TraceDemo() {
               <button
                 type="submit"
                 disabled={phase === "running"}
-                className="font-mono-ui text-[10px] uppercase tracking-[0.26em] bg-cobalt text-white px-6 hover:bg-[var(--cobalt-press)] transition-colors disabled:opacity-50"
+                className="font-body text-[13px] font-semibold tracking-[0.02em] bg-cobalt text-white px-6 hover:bg-[var(--cobalt-press)] transition-colors disabled:opacity-50"
               >
-                {phase === "running" ? "tracing…" : "run trace"}
+                {phase === "running" ? "Tracing…" : "Run trace"}
               </button>
             </form>
 
             <div className="px-5 md:px-6 py-5 font-mono-ui text-[11px] md:text-[12px] leading-[2.3] min-h-[240px]">
               {phase === "idle" && (
                 <div className="text-ink-soft/50">
-                  awaiting subject{" "}
+                  Enter an address to begin{" "}
                   <span className="caret-blink inline-block w-[7px] h-[12px] bg-cobalt align-middle" />
                 </div>
               )}
               {phase !== "idle" && (
                 <>
                   <div className="text-ink-soft/60">
-                    case file · subject <span className="text-ink">{subject}</span>
+                    Example trace · address <span className="text-ink">{subject}</span>
                   </div>
                   {STEPS.slice(0, step).map((s, i) => (
                     <div key={i} className="flex flex-wrap gap-x-3">
@@ -119,11 +119,11 @@ export function TraceDemo() {
               {phase === "done" && (
                 <div className="panel-rise mt-5 border border-muted-line bg-base p-5 md:p-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] uppercase tracking-[0.3em] text-ink-soft">
-                      verdict
+                    <span className="font-body text-[12px] font-medium tracking-[0.02em] text-ink-soft">
+                      Verdict
                     </span>
-                    <span className="text-[9px] uppercase tracking-[0.3em] text-cobalt">
-                      ● locked
+                    <span className="font-body text-[12px] font-medium tracking-[0.02em] text-ink-soft/70">
+                      Illustrative
                     </span>
                   </div>
                   <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
@@ -143,7 +143,7 @@ export function TraceDemo() {
                     </div>
                     <Link
                       to="/access"
-                      className="font-mono-ui text-[10px] uppercase tracking-[0.26em] bg-cobalt text-white px-5 py-3.5 hover:bg-[var(--cobalt-press)] hover:-translate-y-px active:translate-y-0 transition-[transform,background-color] duration-200"
+                      className="font-body text-[13px] font-semibold tracking-[0.02em] bg-cobalt text-white px-5 py-3.5 hover:bg-[var(--cobalt-press)] hover:-translate-y-px active:translate-y-0 transition-[transform,background-color] duration-200"
                     >
                       Request full report →
                     </Link>

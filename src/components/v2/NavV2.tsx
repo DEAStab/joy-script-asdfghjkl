@@ -3,10 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
-  { label: "Feed", href: "#feed" },
+  { label: "Activity", href: "#feed" },
   { label: "Modules", href: "#modules" },
-  { label: "Trace", href: "#trace" },
-  { label: "Doctrine", href: "#doctrine" },
+  { label: "Demo", href: "#trace" },
+  { label: "Methodology", href: "#doctrine" },
 ];
 
 function useUtcClock() {
@@ -79,7 +79,7 @@ export function NavV2() {
           <ThemeToggle />
           <Link
             to="/access"
-            className="hud-frame font-body text-[13px] font-semibold text-ink border border-muted-line px-5 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
+            className="font-body text-[13px] font-semibold text-ink border border-muted-line px-5 py-2.5 hover:border-cobalt hover:text-cobalt transition-colors"
           >
             Request access
           </Link>
