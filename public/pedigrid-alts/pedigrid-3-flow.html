@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PEDIGRID — Provenance Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e9edf4;
+    --surface: #ffffff;
+    --ink: #0b1120;
+    --secondary: #3a4660;
+    --hairline: rgba(11, 17, 32, 0.16);
+    --cobalt-fill: #0047ff;
+    --cobalt: #0b46e6;
+    --flagged: #d62828;
+    --success: #0a8f55;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .module {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    gap: 56px;
+    align-items: stretch;
+  }
+
+  /* ---------- LEFT COLUMN ---------- */
+  .left { padding-top: 6px; }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cobalt);
+    margin: 0 0 22px;
+  }
+  .kicker .lineage {
+    color: var(--secondary);
+    font-weight: 500;
+    margin-left: 10px;
+  }
+
+  .left h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(30px, 3.4vw, 46px);
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+    color: var(--ink);
+    margin: 0 0 24px;
+  }
+
+  .left p {
+    color: var(--secondary);
+    font-size: 15.5px;
+    line-height: 1.55;
+    margin: 0 0 36px;
+    max-width: 46ch;
+  }
+
+  .left .em { color: var(--ink); }
+
+  .footer-hair {
+    height: 1px;
+    background: var(--hairline);
+    margin-bottom: 14px;
+  }
+  .footer-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--secondary);
+    letter-spacing: 0.01em;
+  }
+
+  /* ---------- RIGHT COLUMN / PANEL ---------- */
+  .panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 0;
+    min-height: 400px;
+    height: 400px;
+    overflow: hidden;
+  }
+
+  .panel-cap {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--secondary);
+    z-index: 5;
+  }
+  .panel-live {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--cobalt);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--cobalt);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  .illustrative {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    opacity: 0.6;
+    z-index: 5;
+  }
+
+  /* readout — bottom left of panel */
+  .readout {
+    position: absolute;
+    bottom: 12px;
+    left: 16px;
+    z-index: 5;
+    font-family: "IBM Plex Mono", monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .readout .risk-line {
+    font-size: 12px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .readout .risk-line .val {
+    color: var(--flagged);
+    font-weight: 500;
+  }
+  .readout .sub-line {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--secondary);
+  }
+  .readout .tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .readout .tag {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid var(--hairline);
+    color: var(--secondary);
+  }
+  .readout .tag.bad {
+    color: var(--flagged);
+    border-color: rgba(214, 40, 40, 0.4);
+  }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 960px) {
+    .module { grid-template-columns: 1fr; gap: 40px; }
+    .page { padding: 56px 28px; }
+  }
+  @media (max-width: 480px) {
+    .page { padding: 40px 18px; }
+    .readout .tags { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="module">
+      <!-- LEFT -->
+      <div class="left">
+        <p class="kicker">PEDIGRID<span class="lineage">Lineage tracing</span></p>
+        <h2>Traces the bloodline of an address.</h2>
+        <p>
+          N-hop lineage across known-bad wallets, weighted by distance and provenance.
+          <span class="em">Pedigrid reconstructs the genealogy of risk</span> — branch by branch, source by source.
+        </p>
+        <div class="footer-hair"></div>
+        <div class="footer-label">Graph traversal · weighted distance</div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="panel" id="panel">
+          <div class="panel-cap">PEDIGRID / live view</div>
+          <div class="panel-live"><span class="live-dot"></span>live</div>
+          <canvas id="flow"></canvas>
+          <div class="readout">
+            <div class="risk-line">Lineage risk · <span class="val" id="riskVal">0.84</span></div>
+            <div class="sub-line">3-hop flagged ancestor</div>
+            <div class="tags">
+              <span class="tag bad">OFAC SDN</span>
+              <span class="tag">mixer_contract</span>
+            </div>
+          </div>
+          <div class="illustrative">Illustrative</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("flow");
+  var ctx = canvas.getContext("2d");
+  var panel = document.getElementById("panel");
+  var riskValEl = document.getElementById("riskVal");
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---- palette ----
+  var COL = {
+    bg: "#ffffff",
+    ink: "#0b1120",
+    secondary: "#3a4660",
+    hairline: "rgba(11,17,32,0.16)",
+    cobalt: "#0b46e6",
+    cobaltFill: "#0047ff",
+    flagged: "#d62828",
+    grey: "rgba(58,70,96,0.55)"
+  };
+
+  var dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+  var W = 0, H = 0;
+
+  // ---- model: columns of nodes (left sources -> right subject) ----
+  // hop labels: 3 hops, 2 hops, 1 hop, subject
+  // Build node graph. Each node has col (0..3), y fraction, label, type, address.
+  var nodes = [];
+  var links = [];
+
+  function buildGraph() {
+    nodes = [];
+    links = [];
+
+    // Column definitions (x fractions set later in layout)
+    // col 0: sources (3 hops away)
+    // col 1: intermediate (2 hops)
+    // col 2: intermediate (1 hop)
+    // col 3: subject
+
+    // sources
+    var nSdn = node(0, 0.26, "OFAC SDN cluster", "source-bad", "0x84f3…c2e1");
+    var nTc  = node(0, 0.70, "Tornado Cash", "source-bad", null);
+
+    // 2-hop wallets
+    var nW1 = node(1, 0.18, "wallet", "wallet", null);
+    var nW2 = node(1, 0.50, "mixer_contract", "wallet", "bc1q…m2v8");
+    var nW3 = node(1, 0.80, "wallet", "wallet", null);
+
+    // 1-hop wallets
+    var nH1 = node(2, 0.34, "wallet", "wallet", null);
+    var nH2 = node(2, 0.66, "wallet", "wallet", null);
+
+    // subject
+    var nSub = node(3, 0.50, "subject", "subject", "0x84f3…c2e1");
+
+    // links: {a, b, weight (0..1), dominant}
+    // Dominant red path: SDN -> W2(mixer) -> H1 -> subject
+    link(nSdn, nW2, 0.92, true);
+    link(nW2, nH1, 0.85, true);
+    link(nH1, nSub, 0.84, true);
+
+    // lesser cobalt/grey paths
+    link(nSdn, nW1, 0.30, false);
+    link(nTc, nW2, 0.42, false);
+    link(nTc, nW3, 0.34, false);
+    link(nW1, nH1, 0.22, false);
+    link(nW3, nH2, 0.30, false);
+    link(nW2, nH2, 0.28, false);
+    link(nH2, nSub, 0.40, false);
+  }
+
+  function node(col, yf, label, type, address) {
+    var n = { col: col, yf: yf, label: label, type: type, address: address, x: 0, y: 0, r: 0 };
+    nodes.push(n);
+    return n;
+  }
+  function link(a, b, weight, dominant) {
+    var l = { a: a, b: b, weight: weight, dominant: dominant, particles: [] };
+    links.push(l);
+    return l;
+  }
+
+  // ---- layout ----
+  var pad = { l: 70, r: 86, t: 56, b: 78 };
+  var colX = [];
+
+  function layout() {
+    var rect = panel.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // compress padding on narrow panels
+    var narrow = W < 520;
+    pad.l = narrow ? 50 : 70;
+    pad.r = narrow ? 62 : 86;
+    pad.t = 56;
+    pad.b = 78;
+
+    var usableW = W - pad.l - pad.r;
+    colX = [
+      pad.l,
+      pad.l + usableW * 0.34,
+      pad.l + usableW * 0.68,
+      pad.l + usableW
+    ];
+
+    var top = pad.t;
+    var bot = H - pad.b;
+    var usableH = bot - top;
+
+    nodes.forEach(function (n) {
+      n.x = colX[n.col];
+      n.y = top + n.yf * usableH;
+      if (n.type === "subject") n.r = narrow ? 13 : 16;
+      else if (n.type === "source-bad") n.r = narrow ? 9 : 11;
+      else n.r = narrow ? 6 : 7.5;
+    });
+
+    // seed particles per link based on weight
+    links.forEach(function (l) {
+      var count = l.dominant ? 5 : Math.max(1, Math.round(l.weight * 3));
+      l.particles = [];
+      for (var i = 0; i < count; i++) {
+        l.particles.push(i / count);
+      }
+    });
+  }
+
+  // ---- drawing helpers ----
+  function linkColor(l, alpha) {
+    if (l.dominant) return "rgba(214,40,40," + alpha + ")";
+    return "rgba(11,70,230," + (alpha * 0.55) + ")";
+  }
+
+  // cubic curve point between two nodes
+  function curvePoint(l, t) {
+    var ax = l.a.x, ay = l.a.y, bx = l.b.x, by = l.b.y;
+    var cx1 = ax + (bx - ax) * 0.5;
+    var cy1 = ay;
+    var cx2 = bx - (bx - ax) * 0.5;
+    var cy2 = by;
+    var mt = 1 - t;
+    var x = mt*mt*mt*ax + 3*mt*mt*t*cx1 + 3*mt*t*t*cx2 + t*t*t*bx;
+    var y = mt*mt*mt*ay + 3*mt*mt*t*cy1 + 3*mt*t*t*cy2 + t*t*t*by;
+    return { x: x, y: y };
+  }
+
+  function drawRibbon(l) {
+    var ax = l.a.x + l.a.r, ay = l.a.y;
+    var bx = l.b.x - l.b.r, by = l.b.y;
+    var cx1 = ax + (bx - ax) * 0.5, cy1 = ay;
+    var cx2 = bx - (bx - ax) * 0.5, cy2 = by;
+
+    var maxW = l.dominant ? 14 : 9;
+    var th = Math.max(1.2, l.weight * maxW);
+
+    // ribbon as filled band: offset the curve vertically by ±th/2
+    ctx.beginPath();
+    ctx.moveTo(ax, ay - th / 2);
+    ctx.bezierCurveTo(cx1, cy1 - th / 2, cx2, cy2 - th / 2, bx, by - th / 2);
+    ctx.lineTo(bx, by + th / 2);
+    ctx.bezierCurveTo(cx2, cy2 + th / 2, cx1, cy1 + th / 2, ax, ay + th / 2);
+    ctx.closePath();
+
+    var baseAlpha = l.dominant ? 0.20 : 0.13;
+    ctx.fillStyle = linkColor(l, baseAlpha);
+    ctx.fill();
+
+    // crisp centre line
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.bezierCurveTo(cx1, cy1, cx2, cy2, bx, by);
+    ctx.lineWidth = l.dominant ? 1.4 : 1;
+    ctx.strokeStyle = linkColor(l, l.dominant ? 0.85 : 0.4);
+    ctx.stroke();
+  }
+
+  function drawNode(n) {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+
+    if (n.type === "subject") {
+      ctx.fillStyle = COL.cobaltFill;
+      ctx.fill();
+      // ring
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r + 5, 0, Math.PI * 2);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(11,70,230,0.35)";
+      ctx.stroke();
+    } else if (n.type === "source-bad") {
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = COL.flagged;
+      ctx.stroke();
+      // inner dot
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = COL.flagged;
+      ctx.fill();
+    } else {
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(58,70,96,0.7)";
+      ctx.stroke();
+    }
+  }
+
+  function drawLabels() {
+    ctx.textBaseline = "middle";
+
+    nodes.forEach(function (n) {
+      if (n.type === "wallet" && !n.address && n.label === "wallet") return; // skip plain wallets to reduce clutter
+
+      var fontSize, color, weight;
+      if (n.type === "subject") {
+        fontSize = 11; color = COL.ink; weight = "500";
+      } else if (n.type === "source-bad") {
+        fontSize = 10.5; color = COL.flagged; weight = "500";
+      } else {
+        fontSize = 9.5; color = COL.secondary; weight = "400";
+      }
+
+      ctx.font = weight + " " + fontSize + 'px "IBM Plex Mono", monospace';
+
+      // label position: subject below, sources to right of node, others below
+      var lx, ly, align;
+      if (n.col === 0) {
+        // place label to the right & above so it doesn't collide with ribbons
+        lx = n.x - n.r - 8; ly = n.y - n.r - 9; align = "left";
+        ctx.textAlign = "left";
+        ctx.fillStyle = color;
+        ctx.fillText(n.label, lx, ly);
+        if (n.address) {
+          ctx.font = '400 9px "IBM Plex Mono", monospace';
+          ctx.fillStyle = COL.secondary;
+          ctx.fillText(n.address, lx, ly + 12);
+        }
+      } else if (n.type === "subject") {
+        ctx.textAlign = "center";
+        ctx.fillStyle = color;
+        ctx.fillText("subject", n.x, n.y + n.r + 13);
+        if (n.address) {
+          ctx.font = '400 9px "IBM Plex Mono", monospace';
+          ctx.fillStyle = COL.secondary;
+          ctx.fillText(n.address, n.x, n.y + n.r + 25);
+        }
+      } else {
+        ctx.textAlign = "center";
+        ctx.fillStyle = color;
+        ctx.fillText(n.label, n.x, n.y - n.r - 8);
+        if (n.address) {
+          ctx.font = '400 9px "IBM Plex Mono", monospace';
+          ctx.fillStyle = COL.secondary;
+          ctx.fillText(n.address, n.x, n.y - n.r - 20);
+        }
+      }
+    });
+  }
+
+  function drawHopAxis() {
+    var labels = ["3 hops", "2 hops", "1 hop", "subject"];
+    ctx.font = '500 9px "IBM Plex Mono", monospace';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    var y = H - pad.b + 40;
+    for (var i = 0; i < 4; i++) {
+      ctx.fillStyle = (i === 3) ? COL.cobalt : COL.secondary;
+      ctx.save();
+      ctx.globalAlpha = (i === 3) ? 1 : 0.7;
+      ctx.fillText(labels[i].toUpperCase(), colX[i], y);
+      ctx.restore();
+
+      // faint column guide tick
+      ctx.beginPath();
+      ctx.moveTo(colX[i], pad.t - 18);
+      ctx.lineTo(colX[i], H - pad.b + 18);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = (i === 3) ? "rgba(11,70,230,0.10)" : "rgba(58,70,96,0.07)";
+      ctx.stroke();
+    }
+  }
+
+  // ---- animation ----
+  var t0 = performance.now();
+
+  function drawParticles(dt) {
+    links.forEach(function (l) {
+      var speed = l.dominant ? 0.16 : 0.09; // fraction per second
+      var size = l.dominant ? 2.4 : 1.6;
+      for (var i = 0; i < l.particles.length; i++) {
+        l.particles[i] += speed * dt;
+        if (l.particles[i] > 1) l.particles[i] -= 1;
+        var p = curvePoint(
+          { a: { x: l.a.x + l.a.r, y: l.a.y }, b: { x: l.b.x - l.b.r, y: l.b.y } },
+          l.particles[i]
+        );
+        // fade in/out at ends
+        var tt = l.particles[i];
+        var edgeFade = Math.min(1, Math.min(tt, 1 - tt) * 6);
+        var alpha = (l.dominant ? 0.95 : 0.6) * edgeFade;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = l.dominant
+          ? "rgba(214,40,40," + alpha + ")"
+          : "rgba(11,70,230," + (alpha * 0.85) + ")";
+        ctx.fill();
+
+        // subtle trailing glow on dominant
+        if (l.dominant) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, size + 2.4, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(214,40,40," + (alpha * 0.18) + ")";
+          ctx.fill();
+        }
+      }
+    });
+  }
+
+  function renderStaticFrame() {
+    ctx.clearRect(0, 0, W, H);
+    drawHopAxis();
+    links.forEach(drawRibbon);
+    nodes.forEach(drawNode);
+    drawLabels();
+  }
+
+  var lastT = performance.now();
+  var riskBase = 0.84;
+
+  function frame(now) {
+    var dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+
+    ctx.clearRect(0, 0, W, H);
+    drawHopAxis();
+    links.forEach(drawRibbon);
+    drawParticles(dt);
+    nodes.forEach(drawNode);
+    drawLabels();
+
+    // subtle live readout flicker on risk value (restrained, ±0.00 visual, gentle)
+    var jitter = 0.003 * Math.sin(now / 900);
+    var shown = (riskBase + jitter).toFixed(2);
+    if (riskValEl.textContent !== shown) riskValEl.textContent = shown;
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  var rafId = null;
+
+  function start() {
+    buildGraph();
+    layout();
+    if (reduceMotion) {
+      renderStaticFrame();
+      riskValEl.textContent = riskBase.toFixed(2);
+    } else {
+      lastT = performance.now();
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(frame);
+    }
+  }
+
+  // resize handling (rebuild layout, keep loop)
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      layout();
+      if (reduceMotion) renderStaticFrame();
+    }, 120);
+  });
+
+  // wait for fonts so canvas labels render in correct typeface
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      if (reduceMotion) renderStaticFrame();
+    });
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>

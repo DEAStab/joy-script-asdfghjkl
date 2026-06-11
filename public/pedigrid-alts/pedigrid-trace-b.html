@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PEDIGRID — Lineage Tracing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e9edf4;
+    --surface: #ffffff;
+    --ink: #0b1120;
+    --secondary: #3a4660;
+    --hairline: rgba(11, 17, 32, 0.16);
+    --cobalt-fill: #0047ff;
+    --cobalt: #0b46e6;
+    --flagged: #d62828;
+    --success: #0a8f55;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .module {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    gap: 56px;
+    align-items: stretch;
+  }
+
+  /* ---------- LEFT COLUMN ---------- */
+  .left { padding-top: 6px; }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cobalt);
+    margin: 0 0 24px;
+  }
+  .kicker .lineage {
+    color: var(--secondary);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(30px, 3.4vw, 46px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--secondary);
+    font-size: 15.5px;
+    line-height: 1.55;
+    max-width: 46ch;
+    margin: 0;
+  }
+
+  .left-foot {
+    margin-top: 34px;
+    padding-top: 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .foot-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--secondary);
+    margin: 0;
+  }
+
+  /* ---------- RIGHT COLUMN ---------- */
+  .panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    height: 400px;
+    overflow: hidden;
+  }
+
+  .cap {
+    position: absolute;
+    z-index: 3;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--secondary);
+    pointer-events: none;
+  }
+  .cap.tl { top: 14px; left: 16px; }
+  .cap.tr {
+    top: 14px; right: 16px;
+    letter-spacing: 0.2em;
+    color: var(--cobalt);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .cap.tr .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cobalt);
+    box-shadow: 0 0 0 0 rgba(11,70,230,0.45);
+    animation: livepulse 2.2s ease-out infinite;
+  }
+  @keyframes livepulse {
+    0%   { box-shadow: 0 0 0 0 rgba(11,70,230,0.42); }
+    70%  { box-shadow: 0 0 0 6px rgba(11,70,230,0); }
+    100% { box-shadow: 0 0 0 0 rgba(11,70,230,0); }
+  }
+
+  .illus {
+    position: absolute;
+    z-index: 3;
+    bottom: 12px; right: 16px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    color: var(--secondary);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .stage { position: absolute; inset: 0; }
+  svg { display: block; width: 100%; height: 100%; }
+
+  /* ---------- SVG element styling ---------- */
+  .edge {
+    fill: none;
+    stroke: var(--cobalt);
+    stroke-linecap: round;
+  }
+  .edge.bad { stroke: var(--flagged); }
+
+  .hop-label, .addr {
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .hop-label {
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    fill: var(--secondary);
+    text-transform: uppercase;
+  }
+  .addr {
+    font-size: 8.5px;
+    letter-spacing: 0.02em;
+    fill: var(--secondary);
+  }
+  .flag-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    fill: var(--flagged);
+  }
+  .flag-sub {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8px;
+    letter-spacing: 0.06em;
+    fill: var(--flagged);
+    opacity: 0.8;
+  }
+  .subj-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.16em;
+    fill: var(--ink);
+    text-transform: uppercase;
+  }
+
+  /* readout box */
+  .readout {
+    position: absolute;
+    z-index: 3;
+    left: 16px; bottom: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    pointer-events: none;
+  }
+  .readout .r-k {
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--secondary);
+  }
+  .readout .r-v {
+    font-size: 14px;
+    color: var(--ink);
+    margin-top: 3px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .readout .r-v .num {
+    color: var(--flagged);
+    font-weight: 500;
+  }
+  .readout .r-v .sep { color: var(--secondary); opacity: 0.55; }
+  .readout .r-sub {
+    font-size: 8.5px;
+    color: var(--flagged);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+    min-height: 11px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 960px) {
+    .page { padding: 56px 28px; }
+    .module {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+  @media (max-width: 480px) {
+    .page { padding: 44px 18px; }
+    .panel { height: 360px; }
+    .readout .r-v { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="module">
+      <!-- LEFT -->
+      <div class="left">
+        <p class="kicker">PEDIGRID&nbsp;&nbsp;<span class="lineage">Lineage tracing</span></p>
+        <h2 class="h2">Traces the bloodline of an address.</h2>
+        <p class="lede">N-hop lineage across known-bad wallets, weighted by distance and provenance. Pedigrid reconstructs the genealogy of risk — branch by branch, source by source.</p>
+        <div class="left-foot">
+          <p class="foot-label">Graph traversal · weighted distance</p>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="panel">
+          <span class="cap tl">PEDIGRID / live view</span>
+          <span class="cap tr"><span class="dot"></span>live</span>
+
+          <div class="stage">
+            <svg id="grid" viewBox="0 0 820 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+          </div>
+
+          <div class="readout">
+            <div class="r-k">Lineage risk</div>
+            <div class="r-v" id="risk-val"><span class="num">0.00</span></div>
+            <div class="r-sub" id="risk-sub"></div>
+          </div>
+
+          <span class="illus">Illustrative</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("grid");
+  var riskVal = document.getElementById("risk-val");
+  var riskSub = document.getElementById("risk-sub");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var COL = {
+    cobalt: "#0b46e6",
+    flagged: "#d62828",
+    ink: "#0b1120",
+    secondary: "#3a4660",
+    surface: "#ffffff"
+  };
+
+  // ---- Genealogy layout: subject at right, ancestors fan out to the left ----
+  // hop 0 = subject; higher hop = farther ancestor. Two branches terminate in
+  // flagged (OFAC / mixer) ancestors. Coordinates are in the 820x400 viewBox.
+  var SUBJ = { id: "s", x: 690, y: 200, hop: 0, r: 9, subject: true,
+               label: "SUBJECT", addr: "0x84f3…c2e1" };
+
+  var NODES = [
+    SUBJ,
+    // hop 1
+    { id: "a1", x: 522, y: 112, hop: 1, r: 6.5, parent: "s" },
+    { id: "a2", x: 522, y: 200, hop: 1, r: 6.5, parent: "s", addr: "bc1q…m2v8" },
+    { id: "a3", x: 522, y: 296, hop: 1, r: 6.5, parent: "s" },
+    // hop 2
+    { id: "b1", x: 334, y: 64,  hop: 2, r: 5.5, parent: "a1" },
+    { id: "b2", x: 334, y: 144, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b3", x: 334, y: 200, hop: 2, r: 5.5, parent: "a2", bad: true,
+      flag: "Tornado Cash", flagSub: "mixer · @ 2 hops" },
+    { id: "b4", x: 334, y: 262, hop: 2, r: 5.5, parent: "a3" },
+    { id: "b5", x: 334, y: 336, hop: 2, r: 5.5, parent: "a3" },
+    // hop 3
+    { id: "c1", x: 150, y: 118, hop: 3, r: 4.5, parent: "b2" },
+    { id: "c2", x: 150, y: 200, hop: 3, r: 4.5, parent: "b3", bad: true,
+      flag: "OFAC SDN", flagSub: "flagged · @ 3 hops" },
+    { id: "c3", x: 150, y: 304, hop: 3, r: 4.5, parent: "b4" }
+  ];
+
+  var byId = {};
+  NODES.forEach(function (n) { byId[n.id] = n; });
+
+  // mark every node on a path between a flagged ancestor and the subject
+  NODES.forEach(function (n) {
+    if (n.bad) {
+      var cur = n;
+      while (cur) { cur.onBad = true; cur = cur.parent ? byId[cur.parent] : null; }
+    }
+  });
+
+  // ---- edges (gently curved cubic beziers, parent -> child) ----
+  var EDGES = [];
+  NODES.forEach(function (n) {
+    if (!n.parent) return;
+    var p = byId[n.parent];
+    var w = [0, 3.0, 2.1, 1.4][n.hop] || 1.2;       // closer = thicker
+    var alpha = [0, 0.95, 0.6, 0.38][n.hop] || 0.32; // closer = darker
+    var bad = !!(n.onBad && p.onBad);
+    EDGES.push({ from: p, to: n, w: w, alpha: alpha, bad: bad, hop: n.hop, child: n });
+  });
+  EDGES.sort(function (a, b) { return a.hop - b.hop; });
+
+  function curvePath(p, c) {
+    var x1 = p.x, y1 = p.y, x2 = c.x, y2 = c.y;
+    var mx = (x1 + x2) / 2;
+    return "M" + x1 + " " + y1 + " C " + mx + " " + y1 + " " + mx + " " + y2 + " " + x2 + " " + y2;
+  }
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(SVG_NS, tag);
+    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // faint backdrop grid (echoes the oscilloscope panel)
+  var gGrid = el("g");
+  for (var gx = 0; gx <= 820; gx += 56) {
+    gGrid.appendChild(el("line", { x1: gx, y1: 0, x2: gx, y2: 400,
+      stroke: COL.secondary, "stroke-width": 1, opacity: 0.05 }));
+  }
+  for (var gy = 0; gy <= 400; gy += 56) {
+    gGrid.appendChild(el("line", { x1: 0, y1: gy, x2: 820, y2: gy,
+      stroke: COL.secondary, "stroke-width": 1, opacity: 0.05 }));
+  }
+  svg.appendChild(gGrid);
+
+  var gEdges = el("g"); svg.appendChild(gEdges);
+  var gRisk  = el("g"); svg.appendChild(gRisk);   // red overlay edges (drawn on top of base)
+  var gPulse = el("g"); svg.appendChild(gPulse);
+  var gNodes = el("g"); svg.appendChild(gNodes);
+  var gLabels = el("g"); svg.appendChild(gLabels);
+
+  // base edge path elements (cobalt/ink, measured for stroke-draw)
+  EDGES.forEach(function (e) {
+    var path = el("path", {
+      d: curvePath(e.from, e.to),
+      class: "edge",
+      stroke: COL.cobalt,
+      "stroke-width": e.w,
+      opacity: e.alpha
+    });
+    e.node = path;
+    gEdges.appendChild(path);
+    e.len = path.getTotalLength();
+    path.style.strokeDasharray = e.len;
+    path.style.strokeDashoffset = e.len;
+  });
+
+  // red overlay paths sit on top of bad base edges; revealed in ACT 2.
+  EDGES.forEach(function (e) {
+    if (!e.bad) return;
+    var rp = el("path", {
+      d: curvePath(e.from, e.to),
+      class: "edge bad",
+      stroke: COL.flagged,
+      "stroke-width": e.w + 0.4,
+      opacity: 0
+    });
+    e.redNode = rp;
+    gRisk.appendChild(rp);
+  });
+
+  // node groups
+  NODES.forEach(function (n) {
+    var g = el("g", { transform: "translate(" + n.x + "," + n.y + ")", opacity: 0 });
+    n.dom = g;
+
+    if (n.subject) {
+      g.appendChild(el("circle", { r: n.r + 7, fill: "none",
+        stroke: COL.cobalt, "stroke-width": 1, opacity: 0.35 }));
+      // red alarm ring (hidden until evidence converges)
+      var sring = el("circle", { r: n.r + 7, fill: "none",
+        stroke: COL.flagged, "stroke-width": 1.4, opacity: 0 });
+      n.subjRing = sring;
+      g.appendChild(sring);
+      g.appendChild(el("circle", { r: n.r, fill: COL.cobalt }));
+      g.appendChild(el("circle", { r: n.r - 3, fill: COL.surface }));
+      n.core = el("circle", { r: 2, fill: COL.cobalt });
+      g.appendChild(n.core);
+    } else if (n.bad) {
+      var ring = el("circle", { r: n.r + 5, fill: "none",
+        stroke: COL.flagged, "stroke-width": 1.2, opacity: 0 });
+      n.ring = ring;
+      g.appendChild(ring);
+      // base (neutral cobalt) appearance, swapped to red when lit in ACT 2
+      n.outer = el("circle", { r: n.r, fill: COL.surface,
+        stroke: COL.cobalt, "stroke-width": 1.4 });
+      g.appendChild(n.outer);
+      n.inner = el("circle", { r: n.r - 2.5, fill: COL.cobalt });
+      g.appendChild(n.inner);
+    } else {
+      var op = [1, 1, 0.7, 0.5][n.hop] || 0.5;
+      g.appendChild(el("circle", { r: n.r, fill: COL.surface,
+        stroke: COL.cobalt, "stroke-width": 1.3, opacity: op }));
+      g.appendChild(el("circle", { r: Math.max(1.6, n.r - 3), fill: COL.cobalt, opacity: op }));
+    }
+    gNodes.appendChild(g);
+  });
+
+  // labels (fade together with their node)
+  NODES.forEach(function (n) {
+    var lg = el("g", { opacity: 0 });
+    n.labelDom = lg;
+
+    if (n.subject) {
+      var t = el("text", { x: n.x + n.r + 12, y: n.y - 4, class: "subj-label" });
+      t.textContent = n.label; lg.appendChild(t);
+      var a = el("text", { x: n.x + n.r + 12, y: n.y + 10, class: "addr" });
+      a.textContent = n.addr; lg.appendChild(a);
+    } else {
+      if (n.hop >= 1 && !n.flag) {
+        var ht = el("text", { x: n.x, y: n.y - n.r - 8, class: "hop-label", "text-anchor": "middle" });
+        ht.textContent = n.hop + (n.hop === 1 ? " hop" : " hops");
+        lg.appendChild(ht);
+      }
+      if (n.addr && !n.flag) {
+        var ad = el("text", { x: n.x, y: n.y + n.r + 13, class: "addr", "text-anchor": "middle" });
+        ad.textContent = n.addr; lg.appendChild(ad);
+      }
+      if (n.flag) {
+        var lx = n.x - n.r - 8;
+        var fl = el("text", { x: lx, y: n.y - 3, class: "flag-label", "text-anchor": "end" });
+        fl.textContent = n.flag; lg.appendChild(fl);
+        var fs = el("text", { x: lx, y: n.y + 9, class: "flag-sub", "text-anchor": "end" });
+        fs.textContent = n.flagSub; lg.appendChild(fs);
+        n.flagDom = lg; // start flag text muted, brighten when lit
+      }
+    }
+    gLabels.appendChild(lg);
+  });
+
+  // ---------- timeline ----------
+  // ACT 1 (~3s): subject in, then 3 hops draw outward.
+  // ACT 2 (~3s): flagged ancestors light red one at a time, each fires an
+  //              inward pulse that converges on the subject; risk steps up.
+  // then HOLD (~1.5s) and a smooth fade-loop.
+  var SUBJ_IN  = 420;
+  var EDGE_DRAW = 560;
+  var HOP_GAP  = 240;
+
+  var hopEdges = { 1: [], 2: [], 3: [] };
+  EDGES.forEach(function (e) { hopEdges[e.hop].push(e); });
+
+  var tcur = SUBJ_IN;
+  var hopSched = [];
+  [1, 2, 3].forEach(function (hop) {
+    hopSched.push({ hop: hop, t: tcur, dur: EDGE_DRAW });
+    tcur += EDGE_DRAW + HOP_GAP;
+  });
+  var ACT1_END = tcur; // tree fully drawn (~3.0s)
+
+  // flagged ancestors, fired farthest-first (OFAC @3 then Tornado @2)
+  var flags = NODES.filter(function (n) { return n.bad; })
+    .sort(function (a, b) { return b.hop - a.hop; });
+
+  // each flag: light moment, then a pulse travels inward over PULSE_TRAVEL ms.
+  var FLAG_GAP = 1180;        // spacing between each evidence line igniting
+  var IGNITE   = 360;        // node lights up
+  var PULSE_TRAVEL = 760;    // pulse converges on subject
+  var RISK_STEPS = [0.31, 0.22, 0.18]; // increments as pulses land
+
+  flags.forEach(function (f, i) {
+    f.tIgnite = ACT1_END + 120 + i * FLAG_GAP;
+    f.tPulse  = f.tIgnite + IGNITE;          // pulse departs after ignite
+    f.tLand   = f.tPulse + PULSE_TRAVEL;     // pulse reaches subject
+    f.inc     = RISK_STEPS[i] || 0.15;
+    // chain of bad edges from this flagged node inward to the subject
+    var chain = [];
+    var cur = f;
+    while (cur && cur.parent) {
+      var pe = EDGES.filter(function (e) { return e.child === cur; })[0];
+      if (pe) chain.push(pe);
+      cur = byId[cur.parent];
+    }
+    f.chain = chain;           // ordered outer -> inner (child side first)
+    f.chainLen = chain.reduce(function (s, e) { return s + e.len; }, 0);
+  });
+
+  var lastFlag = flags[flags.length - 1];
+  var ACT2_END = lastFlag.tLand + 260;
+  var HOLD = 1500, FADEOUT = 700;
+  var CYCLE = ACT2_END + HOLD + FADEOUT;
+
+  // travelling pulse markers
+  var pulseGlow = el("circle", { r: 6.5, fill: COL.flagged, opacity: 0 });
+  var pulseDot  = el("circle", { r: 2.8, fill: COL.flagged, opacity: 0 });
+  gPulse.appendChild(pulseGlow);
+  gPulse.appendChild(pulseDot);
+
+  function setEdgeProgress(e, p) {
+    e.node.style.strokeDashoffset = e.len * (1 - p);
+  }
+  function nodeOpacity(n, o) {
+    n.dom.setAttribute("opacity", o);
+    n.labelDom.setAttribute("opacity", o);
+  }
+  function ss(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  // point at distance d along a flag's inner-bound chain, measured from the
+  // flagged node (outer) toward the subject (inner).
+  function chainPoint(flag, d) {
+    var rem = d;
+    for (var i = 0; i < flag.chain.length; i++) {
+      var e = flag.chain[i];
+      if (rem <= e.len) {
+        // chain edges run parent->child in their path; we travel child->parent
+        return e.node.getPointAtLength(e.len - rem);
+      }
+      rem -= e.len;
+    }
+    var last = flag.chain[flag.chain.length - 1];
+    return last.node.getPointAtLength(0);
+  }
+
+  function setRedNode(n, lit) {
+    if (!n.outer) return;
+    n.outer.setAttribute("stroke", lit ? COL.flagged : COL.cobalt);
+    n.inner.setAttribute("fill", lit ? COL.flagged : COL.cobalt);
+    if (n.flagDom) n.flagDom.style.opacity = "";
+  }
+
+  function resetCycle() {
+    EDGES.forEach(function (e) {
+      e.node.style.strokeDashoffset = e.len;
+      e.node.setAttribute("opacity", e.alpha);
+      if (e.redNode) e.redNode.setAttribute("opacity", 0);
+    });
+    NODES.forEach(function (n) {
+      nodeOpacity(n, 0);
+      if (n.ring) n.ring.setAttribute("opacity", 0);
+      if (n.subjRing) n.subjRing.setAttribute("opacity", 0);
+      setRedNode(n, false);
+      if (n.core) n.core.setAttribute("fill", COL.cobalt);
+    });
+    pulseDot.setAttribute("opacity", 0);
+    pulseGlow.setAttribute("opacity", 0);
+  }
+
+  var SETTLED_HTML = '<span class="num">0.84</span>' +
+    ' <span class="sep">·</span> <span style="color:var(--ink)">3-hop flagged ancestor</span>';
+
+  function setRiskScore(score, sub) {
+    riskVal.innerHTML = '<span class="num">' + score.toFixed(2) + '</span>';
+    riskSub.textContent = sub || "";
+  }
+  function setRiskSettled() {
+    riskVal.innerHTML = SETTLED_HTML;
+    riskSub.textContent = "OFAC SDN lineage · 2 flagged ancestors";
+  }
+
+  var startTime = null, raf = 0, lastT = 0;
+
+  function frame(ts) {
+    if (startTime === null) startTime = ts;
+    var t = (ts - startTime) % CYCLE;
+
+    if (t < lastT) {           // cycle wrap -> reset
+      resetCycle();
+      setRiskScore(0, "");
+    }
+    lastT = t;
+
+    if (t < ACT2_END + HOLD) {
+      svg.style.opacity = 1;
+
+      // ---- subject fades in ----
+      nodeOpacity(SUBJ, ss(t / SUBJ_IN));
+
+      // ---- ACT 1: hops draw outward, children fade as their edge completes ----
+      hopSched.forEach(function (s) {
+        var p = ss((t - s.t) / s.dur);
+        hopEdges[s.hop].forEach(function (e) {
+          setEdgeProgress(e, p);
+          if (p > 0) nodeOpacity(e.child, ss((p - 0.4) / 0.6));
+        });
+      });
+
+      // ---- ACT 2: flags ignite, fire inward pulses, risk steps up ----
+      var risk = 0;
+      var anyPulseActive = false;
+      var domPulse = null;
+
+      flags.forEach(function (f) {
+        // ignite (swap node + flag text + ring to red)
+        var ig = ss((t - f.tIgnite) / IGNITE);
+        if (ig > 0) {
+          setRedNode(f, true);
+          // pulsing alarm ring on the flagged node
+          var ph = ((t - f.tIgnite) % 1500) / 1500;
+          if (f.ring) {
+            var rp = ss(ph < 0.6 ? ph / 0.6 : 1);
+            f.ring.setAttribute("r", (f.r + 5) + rp * 9);
+            f.ring.setAttribute("opacity", ig * (1 - ph) * 0.7);
+          }
+          // red overlay on this flag's chain (reveals progressively with pulse)
+        }
+
+        // inward pulse
+        if (t >= f.tPulse) {
+          var pp = ss((t - f.tPulse) / PULSE_TRAVEL);
+          // reveal red overlay along the chain as the pulse passes
+          f.chain.forEach(function (e) {
+            if (e.redNode) e.redNode.setAttribute("opacity", Math.max(
+              parseFloat(e.redNode.getAttribute("opacity")) || 0, ig * 0.95));
+          });
+          if (pp < 1) {
+            anyPulseActive = true;
+            var d = pp * f.chainLen;
+            var pt = chainPoint(f, d);
+            // keep the strongest (most-advanced) pulse as the visible dot
+            if (!domPulse || pp >= domPulse.pp) domPulse = { pt: pt, pp: pp, fade: Math.sin(pp * Math.PI) };
+          }
+        }
+
+        // risk contribution: 0 before pulse departs, ramps to full as it lands
+        if (t >= f.tPulse) {
+          risk += f.inc * ss((t - f.tPulse) / PULSE_TRAVEL);
+        }
+      });
+
+      // subject reaction: red ring + red core grow as evidence lands
+      var landed = 0;
+      flags.forEach(function (f) { if (t >= f.tLand) landed++; });
+      if (landed > 0 || anyPulseActive) {
+        var subjLit = ss(Math.min(1, risk / 0.7));
+        if (SUBJ.subjRing) SUBJ.subjRing.setAttribute("opacity", subjLit * 0.85);
+        if (SUBJ.core) SUBJ.core.setAttribute("fill",
+          subjLit > 0.5 ? COL.flagged : COL.cobalt);
+      }
+
+      // non-flagged branches dim slightly once risk paths are lit
+      if (t >= flags[0].tIgnite) {
+        var dim = ss((t - flags[0].tIgnite) / 600);
+        EDGES.forEach(function (e) {
+          if (!e.bad) e.node.setAttribute("opacity", lerp(e.alpha, e.alpha * 0.4, dim));
+        });
+        NODES.forEach(function (n) {
+          if (!n.onBad && !n.subject) {
+            var cur = parseFloat(n.dom.getAttribute("opacity"));
+            if (cur > 0) {
+              n.dom.style.opacity = "";
+              n.dom.setAttribute("opacity", lerp(cur, cur * 0.55, dim));
+              n.labelDom.setAttribute("opacity", lerp(cur, cur * 0.55, dim));
+            }
+          }
+        });
+      }
+
+      // render the travelling pulse dot
+      if (domPulse) {
+        pulseDot.setAttribute("cx", domPulse.pt.x);
+        pulseDot.setAttribute("cy", domPulse.pt.y);
+        pulseDot.setAttribute("opacity", 0.92 * domPulse.fade + 0.08);
+        pulseGlow.setAttribute("cx", domPulse.pt.x);
+        pulseGlow.setAttribute("cy", domPulse.pt.y);
+        pulseGlow.setAttribute("opacity", 0.2 * domPulse.fade);
+      } else {
+        pulseDot.setAttribute("opacity", 0);
+        pulseGlow.setAttribute("opacity", 0);
+      }
+
+      // ---- risk readout ----
+      if (t >= ACT2_END) {
+        setRiskSettled();
+      } else if (t < ACT1_END) {
+        setRiskScore(0, "tracing lineage…");
+      } else {
+        setRiskScore(Math.min(0.84, risk),
+          anyPulseActive || risk > 0 ? "evidence converging…" : "tree drawn · scanning ancestors…");
+      }
+    } else {
+      // fade out before restart
+      svg.style.opacity = 1 - ss((t - (ACT2_END + HOLD)) / FADEOUT);
+      pulseDot.setAttribute("opacity", 0);
+      pulseGlow.setAttribute("opacity", 0);
+    }
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  // ---------- static (reduced motion) render: final settled frame ----------
+  function renderStatic() {
+    EDGES.forEach(function (e) {
+      e.node.style.strokeDashoffset = 0;
+      e.node.setAttribute("opacity", e.bad ? e.alpha : e.alpha * 0.4);
+      if (e.redNode) e.redNode.setAttribute("opacity", 0.95);
+    });
+    NODES.forEach(function (n) {
+      var o = (n.onBad || n.subject) ? 1 : 0.55;
+      nodeOpacity(n, o);
+      if (n.bad) {
+        setRedNode(n, true);
+        if (n.ring) { n.ring.setAttribute("r", n.r + 7); n.ring.setAttribute("opacity", 0.5); }
+      }
+    });
+    if (SUBJ.subjRing) SUBJ.subjRing.setAttribute("opacity", 0.85);
+    if (SUBJ.core) SUBJ.core.setAttribute("fill", COL.flagged);
+
+    // pulse resting near the subject on the dominant (innermost) red edge
+    if (flags.length) {
+      var dom = flags[0]; // OFAC, deepest -> dominant path
+      var pt = chainPoint(dom, dom.chainLen * 0.82);
+      pulseDot.setAttribute("cx", pt.x); pulseDot.setAttribute("cy", pt.y);
+      pulseDot.setAttribute("opacity", 0.9);
+      pulseGlow.setAttribute("cx", pt.x); pulseGlow.setAttribute("cy", pt.y);
+      pulseGlow.setAttribute("opacity", 0.18);
+    }
+    setRiskSettled();
+    svg.style.opacity = 1;
+    var dot = document.querySelector(".cap.tr .dot");
+    if (dot) dot.style.animation = "none";
+  }
+
+  if (reduce) {
+    renderStatic();
+  } else {
+    resetCycle();
+    setRiskScore(0, "");
+    raf = requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
