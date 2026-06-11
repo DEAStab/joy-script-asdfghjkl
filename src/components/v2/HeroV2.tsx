@@ -43,8 +43,8 @@ export function HeroV2() {
             {...rise(0.45)}
             className="text-ink-soft mt-8 text-[16px] md:text-[17px] leading-relaxed max-w-[52ch]"
           >
-            PreCog watches every chain at once — scoring wallets, naming laundering patterns, and
-            surfacing the evidence before the headline writes itself.
+            PreCog is an AI-native blockchain analytics platform — scoring wallets, naming
+            laundering patterns, and surfacing the evidence before the headline writes itself.
           </motion.p>
 
           <motion.div {...rise(0.6)} className="mt-10 flex flex-wrap items-center gap-5">

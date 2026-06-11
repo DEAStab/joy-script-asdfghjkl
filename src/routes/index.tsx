@@ -3,7 +3,7 @@ import { NavV2 } from "@/components/v2/NavV2";
 import { HeroV2 } from "@/components/v2/HeroV2";
 import { LiveFeed } from "@/components/v2/LiveFeed";
 import { ModulesDeck } from "@/components/v2/ModulesDeck";
-import { TraceDemo } from "@/components/v2/TraceDemo";
+import { HowItWorks } from "@/components/v2/HowItWorks";
 import { Doctrine } from "@/components/v2/Doctrine";
 import { CtaSection } from "@/components/v2/CtaSection";
 import { FooterV2 } from "@/components/v2/FooterV2";
@@ -35,7 +35,7 @@ function Index() {
       <HeroV2 />
       <LiveFeed />
       <ModulesDeck />
-      <TraceDemo />
+      <HowItWorks />
       <Doctrine />
       <CtaSection />
       <FooterV2 />

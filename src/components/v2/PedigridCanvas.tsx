@@ -37,7 +37,7 @@ type PEdge = {
 
 /**
  * PEDIGRID lineage trace: a genealogy that reconstructs itself outward from the
- * subject over ~5.5s, the flagged path peeling off as an upward side branch and
+ * subject over ~3s, the flagged path peeling off as an upward side branch and
  * lighting red as ancestors are reached, then holds and loops. Colours come from
  * theme CSS variables (works in light + dark, no rebuild on flip); pauses
  * offscreen; renders a clean static final frame under prefers-reduced-motion.
@@ -288,12 +288,12 @@ export function PedigridCanvas() {
     gPulse.appendChild(pulseGlow);
     gPulse.appendChild(pulseDot);
 
-    // ---- animation engine ----
-    const SUBJ_IN = 520;
-    const HOP_DRAW = 1180;
-    const HOP_GAP = 160;
-    const HOLD = 1800;
-    const FADEOUT = 820;
+    // ---- animation engine (full reveal ~3s) ----
+    const SUBJ_IN = 320;
+    const HOP_DRAW = 800;
+    const HOP_GAP = 130;
+    const HOLD = 1200;
+    const FADEOUT = 600;
 
     const hopEdges: Record<number, PEdge[]> = { 1: [], 2: [], 3: [] };
     EDGES.forEach((e) => hopEdges[e.hop].push(e));
