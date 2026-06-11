@@ -1,82 +1,7 @@
 import type { ReactNode } from "react";
 import { NetworkCanvas } from "./NetworkCanvas";
 import { TangoCanvas } from "./TangoCanvas";
-
-function PedigridViz() {
-  const nodes = [
-    { x: 280, y: 24, hot: false }, // subject
-    { x: 280, y: 78, hot: false },
-    { x: 180, y: 122, hot: false },
-    { x: 380, y: 122, hot: true },
-    { x: 120, y: 166, hot: true },
-    { x: 240, y: 166, hot: false },
-    { x: 440, y: 166, hot: false },
-  ];
-  const edges = [
-    [0, 1, false],
-    [1, 2, false],
-    [1, 3, true],
-    [2, 4, true],
-    [2, 5, false],
-    [3, 6, false],
-  ] as const;
-  return (
-    <svg viewBox="0 0 560 190" className="w-full h-full" aria-hidden="true">
-      {edges.map(([a, b, hot], i) => (
-        <line
-          key={i}
-          x1={nodes[a].x}
-          y1={nodes[a].y}
-          x2={nodes[b].x}
-          y2={nodes[b].y}
-          stroke={hot ? "var(--threat)" : "var(--ink-soft)"}
-          strokeOpacity={hot ? 1 : 0.4}
-          strokeWidth={hot ? 1.2 : 0.8}
-          strokeDasharray={hot ? "none" : "3 3"}
-        />
-      ))}
-      {nodes.map((n, i) => (
-        <g key={i}>
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r={i === 0 ? 5 : 3.5}
-            fill={n.hot ? "var(--threat)" : i === 0 ? "var(--cobalt)" : "var(--ink-soft)"}
-          />
-          {n.hot && (
-            <circle
-              cx={n.x}
-              cy={n.y}
-              r="9"
-              fill="none"
-              stroke="var(--threat)"
-              strokeWidth="0.8"
-              className="threat-ring"
-            />
-          )}
-        </g>
-      ))}
-      <text
-        x={nodes[0].x + 12}
-        y={nodes[0].y + 4}
-        fontSize="10"
-        fill="var(--cobalt)"
-        fontFamily="IBM Plex Mono, monospace"
-      >
-        subject
-      </text>
-      <text
-        x={nodes[4].x - 18}
-        y={nodes[4].y + 18}
-        fontSize="9"
-        fill="var(--threat)"
-        fontFamily="IBM Plex Mono, monospace"
-      >
-        OFAC @ 3 hops
-      </text>
-    </svg>
-  );
-}
+import { PedigridCanvas } from "./PedigridCanvas";
 
 const MODULES: {
   index: string;
@@ -116,7 +41,7 @@ const MODULES: {
     body: "N-hop lineage across known-bad wallets, weighted by distance and provenance. Pedigrid reconstructs the genealogy of risk — branch by branch, source by source.",
     stat: "Graph traversal · weighted distance",
     caption: "Example output",
-    viz: <PedigridViz />,
+    viz: <PedigridCanvas />,
   },
 ];
 
