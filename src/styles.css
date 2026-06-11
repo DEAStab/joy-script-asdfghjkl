@@ -289,6 +289,105 @@ html.theme-transition *::after {
   animation: scan-x 4.5s linear infinite;
 }
 
+/* ——— PEDIGRID lineage graph (colours via theme vars; geometry in JS) ——— */
+.pg-grid {
+  stroke: var(--ink-soft);
+}
+.pg-edge {
+  fill: none;
+  stroke: var(--cobalt);
+  stroke-linecap: round;
+}
+.pg-edge.bad {
+  stroke: var(--threat);
+}
+.pg-node-ring {
+  fill: none;
+  stroke: var(--cobalt);
+}
+.pg-node-core {
+  fill: var(--cobalt);
+}
+.pg-node-hole {
+  fill: var(--surface);
+}
+.pg-neutral-stroke {
+  fill: var(--surface);
+  stroke: var(--cobalt);
+}
+.pg-bad-ring {
+  fill: none;
+  stroke: var(--threat);
+}
+.pg-bad-stroke {
+  fill: var(--surface);
+  stroke: var(--threat);
+}
+.pg-bad-core {
+  fill: var(--threat);
+}
+.pg-scan {
+  fill: var(--cobalt);
+}
+.pg-scan.bad,
+.pg-pulse {
+  fill: var(--threat);
+}
+.pg-chip-bg {
+  fill: var(--surface);
+  stroke: var(--muted-line);
+}
+.pg-hop,
+.pg-addr,
+.pg-flag,
+.pg-flagsub,
+.pg-subj,
+.pg-chip-tx,
+.pg-rk,
+.pg-rv-num,
+.pg-rv-txt {
+  font-family: var(--font-mono);
+}
+.pg-hop {
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  fill: var(--ink-soft);
+}
+.pg-addr,
+.pg-chip-tx {
+  font-size: 8.5px;
+  fill: var(--ink-soft);
+}
+.pg-flag {
+  font-size: 9px;
+  font-weight: 500;
+  fill: var(--threat);
+}
+.pg-flagsub {
+  font-size: 8px;
+  fill: var(--threat);
+  opacity: 0.8;
+}
+.pg-subj {
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  fill: var(--ink);
+}
+.pg-rk {
+  font-size: 8.5px;
+  letter-spacing: 0.2em;
+  fill: var(--ink-soft);
+}
+.pg-rv-num {
+  font-size: 13px;
+  font-weight: 500;
+  fill: var(--threat);
+}
+.pg-rv-txt {
+  font-size: 11px;
+  fill: var(--ink);
+}
+
 /* ——— slashed zero for the 00bit wordmark ——— */
 .zero-slashed {
   position: relative;
