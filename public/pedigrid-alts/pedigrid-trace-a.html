@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PEDIGRID — Lineage Tracing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e9edf4;
+    --surface: #ffffff;
+    --ink: #0b1120;
+    --secondary: #3a4660;
+    --hairline: rgba(11, 17, 32, 0.16);
+    --cobalt-fill: #0047ff;
+    --cobalt: #0b46e6;
+    --flagged: #d62828;
+    --success: #0a8f55;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .module {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    gap: 56px;
+    align-items: stretch;
+  }
+
+  /* ---------- LEFT COLUMN ---------- */
+  .left { padding-top: 6px; }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cobalt);
+    margin: 0 0 24px;
+  }
+  .kicker .lineage {
+    color: var(--secondary);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(30px, 3.4vw, 46px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--secondary);
+    font-size: 15.5px;
+    line-height: 1.55;
+    max-width: 46ch;
+    margin: 0;
+  }
+
+  .left-foot {
+    margin-top: 34px;
+    padding-top: 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .foot-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--secondary);
+    margin: 0;
+  }
+
+  /* ---------- RIGHT COLUMN ---------- */
+  .panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    height: 400px;
+    overflow: hidden;
+  }
+
+  .cap {
+    position: absolute;
+    z-index: 3;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--secondary);
+    pointer-events: none;
+  }
+  .cap.tl { top: 14px; left: 16px; }
+  .cap.tr {
+    top: 14px; right: 16px;
+    letter-spacing: 0.2em;
+    color: var(--cobalt);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .cap.tr .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cobalt);
+    box-shadow: 0 0 0 0 rgba(11,70,230,0.45);
+    animation: livepulse 2.2s ease-out infinite;
+  }
+  @keyframes livepulse {
+    0%   { box-shadow: 0 0 0 0 rgba(11,70,230,0.42); }
+    70%  { box-shadow: 0 0 0 6px rgba(11,70,230,0); }
+    100% { box-shadow: 0 0 0 0 rgba(11,70,230,0); }
+  }
+
+  .illus {
+    position: absolute;
+    z-index: 3;
+    bottom: 12px; right: 16px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    color: var(--secondary);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .stage { position: absolute; inset: 0; }
+  svg { display: block; width: 100%; height: 100%; }
+
+  /* ---------- SVG element styling ---------- */
+  .edge {
+    fill: none;
+    stroke: var(--cobalt);
+    stroke-linecap: round;
+  }
+  .edge.bad { stroke: var(--flagged); }
+
+  .hop-label, .addr {
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .hop-label {
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    fill: var(--secondary);
+    text-transform: uppercase;
+  }
+  .addr {
+    font-size: 8.5px;
+    letter-spacing: 0.02em;
+    fill: var(--secondary);
+  }
+  /* small mono address chips */
+  .chip-bg {
+    fill: var(--surface);
+    stroke: var(--hairline);
+    stroke-width: 1;
+  }
+  .chip-tx {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.02em;
+    fill: var(--secondary);
+  }
+  .flag-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    fill: var(--flagged);
+  }
+  .flag-sub {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8px;
+    letter-spacing: 0.06em;
+    fill: var(--flagged);
+    opacity: 0.8;
+  }
+  .subj-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.16em;
+    fill: var(--ink);
+    text-transform: uppercase;
+  }
+
+  /* readout box */
+  .readout {
+    position: absolute;
+    z-index: 3;
+    left: 16px; bottom: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    pointer-events: none;
+  }
+  .readout .r-k {
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--secondary);
+  }
+  .readout .r-v {
+    font-size: 14px;
+    color: var(--ink);
+    margin-top: 3px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .readout .r-v .num {
+    color: var(--flagged);
+    font-weight: 500;
+  }
+  .readout .r-v .sep { color: var(--secondary); opacity: 0.55; }
+  .readout .r-sub {
+    font-size: 8.5px;
+    color: var(--flagged);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+    min-height: 11px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 960px) {
+    .page { padding: 56px 28px; }
+    .module {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+  @media (max-width: 480px) {
+    .page { padding: 44px 18px; }
+    .panel { height: 360px; }
+    .readout .r-v { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="module">
+      <!-- LEFT -->
+      <div class="left">
+        <p class="kicker">PEDIGRID&nbsp;&nbsp;<span class="lineage">Lineage tracing</span></p>
+        <h2 class="h2">Traces the bloodline of an address.</h2>
+        <p class="lede">N-hop lineage across known-bad wallets, weighted by distance and provenance. Pedigrid reconstructs the genealogy of risk — branch by branch, source by source.</p>
+        <div class="left-foot">
+          <p class="foot-label">Graph traversal · weighted distance</p>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="panel">
+          <span class="cap tl">PEDIGRID / live view</span>
+          <span class="cap tr"><span class="dot"></span>live</span>
+
+          <div class="stage">
+            <svg id="grid" viewBox="0 0 820 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+          </div>
+
+          <div class="readout">
+            <div class="r-k">Lineage risk</div>
+            <div class="r-v" id="risk-val"><span class="num">0.00</span></div>
+            <div class="r-sub" id="risk-sub"></div>
+          </div>
+
+          <span class="illus">Illustrative</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("grid");
+  var riskVal = document.getElementById("risk-val");
+  var riskSub = document.getElementById("risk-sub");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var COL = {
+    cobalt: "#0b46e6",
+    flagged: "#d62828",
+    ink: "#0b1120",
+    secondary: "#3a4660",
+    surface: "#ffffff"
+  };
+
+  // ---- Genealogy layout: subject at right, ancestors fan out to the left ----
+  // hop 0 = subject; higher hop = farther ancestor. The worst branch ends in
+  // flagged (OFAC / mixer) ancestors. Coordinates are in the 820x400 viewBox.
+  var SUBJ = { id: "s", x: 690, y: 214, hop: 0, r: 9, subject: true,
+               label: "SUBJECT", chip: "0x84f3…c2e1" };
+
+  var NODES = [
+    SUBJ,
+    // hop 1 — neutral trunk stays level; the flagged branch peels upward
+    { id: "a1", x: 524, y: 214, hop: 1, r: 6.5, parent: "s" },
+    { id: "a2", x: 540, y: 126, hop: 1, r: 6.5, parent: "s", bad: true, chip: "bc1q…m2v8" },
+    { id: "a3", x: 524, y: 300, hop: 1, r: 6.5, parent: "s" },
+    // hop 2
+    { id: "b1", x: 348, y: 178, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b2", x: 348, y: 244, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b3", x: 384, y: 80,  hop: 2, r: 5.5, parent: "a2", bad: true,
+      flag: "Tornado Cash", flagSub: "mixer · @ 2 hops" },
+    { id: "b4", x: 348, y: 312, hop: 2, r: 5.5, parent: "a3" },
+    { id: "b5", x: 348, y: 356, hop: 2, r: 5.5, parent: "a3" },
+    // hop 3
+    { id: "c1", x: 166, y: 250, hop: 3, r: 4.5, parent: "b2" },
+    { id: "c2", x: 214, y: 58,  hop: 3, r: 4.5, parent: "b3", bad: true,
+      flag: "OFAC SDN", flagSub: "flagged · @ 3 hops" },
+    { id: "c3", x: 166, y: 330, hop: 3, r: 4.5, parent: "b4" }
+  ];
+
+  var byId = {};
+  NODES.forEach(function (n) { byId[n.id] = n; });
+
+  // mark every node on a path that terminates in a flagged hop-3 ancestor
+  NODES.forEach(function (n) {
+    if (n.bad && n.hop === 3) {
+      var cur = n;
+      while (cur) { cur.onBad = true; cur = cur.parent ? byId[cur.parent] : null; }
+    }
+  });
+
+  // ---- edges (gently curved cubic beziers, parent -> child) ----
+  // depth feel: closer-to-subject branches thicker & darker, farther thinner & faded
+  var EDGES = [];
+  NODES.forEach(function (n) {
+    if (!n.parent) return;
+    var p = byId[n.parent];
+    var w = [0, 3.2, 2.1, 1.3][n.hop] || 1.1;        // closer = thicker
+    var alpha = [0, 0.95, 0.55, 0.32][n.hop] || 0.28; // closer = darker
+    var bad = !!(n.onBad && p.onBad);
+    EDGES.push({ from: p, to: n, w: w, alpha: alpha, bad: bad, hop: n.hop, child: n });
+  });
+  EDGES.sort(function (a, b) { return a.hop - b.hop; });
+
+  function curvePath(p, c) {
+    // smooth organic S-curve (cubic) parent -> child
+    var x1 = p.x, y1 = p.y, x2 = c.x, y2 = c.y;
+    var mx = (x1 + x2) / 2;
+    return "M" + x1 + " " + y1 + " C " + mx + " " + y1 + " " + mx + " " + y2 + " " + x2 + " " + y2;
+  }
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(SVG_NS, tag);
+    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // faint backdrop grid (echoes the oscilloscope panel)
+  var gGrid = el("g");
+  for (var gx = 0; gx <= 820; gx += 56) {
+    gGrid.appendChild(el("line", { x1: gx, y1: 0, x2: gx, y2: 400,
+      stroke: COL.secondary, "stroke-width": 1, opacity: 0.05 }));
+  }
+  for (var gy = 0; gy <= 400; gy += 56) {
+    gGrid.appendChild(el("line", { x1: 0, y1: gy, x2: 820, y2: gy,
+      stroke: COL.secondary, "stroke-width": 1, opacity: 0.05 }));
+  }
+  svg.appendChild(gGrid);
+
+  var gEdges = el("g"); svg.appendChild(gEdges);
+  var gScan  = el("g"); svg.appendChild(gScan);
+  var gPulse = el("g"); svg.appendChild(gPulse);
+  var gNodes = el("g"); svg.appendChild(gNodes);
+  var gLabels = el("g"); svg.appendChild(gLabels);
+
+  // edge path elements (measured for stroke-draw)
+  EDGES.forEach(function (e) {
+    var path = el("path", {
+      d: curvePath(e.from, e.to),
+      class: "edge" + (e.bad ? " bad" : ""),
+      "stroke-width": e.w,
+      opacity: e.bad ? 0.92 : e.alpha
+    });
+    e.node = path;
+    gEdges.appendChild(path);
+    e.len = path.getTotalLength();
+    path.style.strokeDasharray = e.len;
+    path.style.strokeDashoffset = e.len;
+
+    // a soft cobalt scan glow that rides the drawing head of each edge
+    var scan = el("circle", {
+      r: e.bad ? 7 : 6, fill: e.bad ? COL.flagged : COL.cobalt, opacity: 0
+    });
+    e.scan = scan;
+    gScan.appendChild(scan);
+    var scanCore = el("circle", {
+      r: 2.2, fill: e.bad ? COL.flagged : COL.cobalt, opacity: 0
+    });
+    e.scanCore = scanCore;
+    gScan.appendChild(scanCore);
+  });
+
+  // node groups
+  NODES.forEach(function (n) {
+    var g = el("g", { transform: "translate(" + n.x + "," + n.y + ")", opacity: 0 });
+    n.dom = g;
+    n.baseScale = 1;
+
+    if (n.subject) {
+      g.appendChild(el("circle", { r: n.r + 7, fill: "none",
+        stroke: COL.cobalt, "stroke-width": 1, opacity: 0.35 }));
+      g.appendChild(el("circle", { r: n.r, fill: COL.cobalt }));
+      g.appendChild(el("circle", { r: n.r - 3, fill: COL.surface }));
+      g.appendChild(el("circle", { r: 2, fill: COL.cobalt }));
+    } else if (n.bad) {
+      var ring = el("circle", { r: n.r + 5, fill: "none",
+        stroke: COL.flagged, "stroke-width": 1.2, opacity: 0 });
+      n.ring = ring;
+      g.appendChild(ring);
+      g.appendChild(el("circle", { r: n.r, fill: COL.surface,
+        stroke: COL.flagged, "stroke-width": 1.6 }));
+      g.appendChild(el("circle", { r: n.r - 2.5, fill: COL.flagged }));
+    } else {
+      var op = [1, 1, 0.7, 0.5][n.hop] || 0.5;
+      g.appendChild(el("circle", { r: n.r, fill: COL.surface,
+        stroke: COL.cobalt, "stroke-width": 1.3, opacity: op }));
+      g.appendChild(el("circle", { r: Math.max(1.6, n.r - 3), fill: COL.cobalt, opacity: op }));
+    }
+    gNodes.appendChild(g);
+  });
+
+  // labels & address chips (fade together with their node)
+  NODES.forEach(function (n) {
+    var lg = el("g", { opacity: 0 });
+    n.labelDom = lg;
+
+    if (n.subject) {
+      var t = el("text", { x: n.x + n.r + 12, y: n.y - 4, class: "subj-label" });
+      t.textContent = n.label; lg.appendChild(t);
+    } else {
+      if (n.hop >= 1 && !n.flag) {
+        var ht = el("text", { x: n.x, y: n.y - n.r - 8, class: "hop-label", "text-anchor": "middle" });
+        ht.textContent = n.hop + (n.hop === 1 ? " hop" : " hops");
+        lg.appendChild(ht);
+      }
+      if (n.flag) {
+        var lx = n.x - n.r - 8;
+        var fl = el("text", { x: lx, y: n.y - 3, class: "flag-label", "text-anchor": "end" });
+        fl.textContent = n.flag; lg.appendChild(fl);
+        var fs = el("text", { x: lx, y: n.y + 9, class: "flag-sub", "text-anchor": "end" });
+        fs.textContent = n.flagSub; lg.appendChild(fs);
+      }
+    }
+    gLabels.appendChild(lg);
+  });
+
+  // small mono address chips — fade in on their own gentle timeline
+  var CHIPS = [];
+  NODES.forEach(function (n) {
+    if (!n.chip) return;
+    var below = n.subject ? n.y + n.r + 24 : n.y + n.r + 16;
+    var cw = n.chip.length * 5.0 + 14;
+    var cx = n.subject ? n.x + n.r + 12 + cw / 2 : n.x;
+    var cg = el("g", { opacity: 0 });
+    cg.appendChild(el("rect", {
+      x: cx - cw / 2, y: below - 9, width: cw, height: 14, rx: 0, class: "chip-bg"
+    }));
+    var tx = el("text", { x: cx, y: below + 1, class: "chip-tx", "text-anchor": "middle" });
+    tx.textContent = n.chip;
+    cg.appendChild(tx);
+    gLabels.appendChild(cg);
+    CHIPS.push({ dom: cg, node: n });
+  });
+
+  // ---------- animation engine ----------
+  // Full reveal ~5.5s, hold ~1.8s, gentle fade ~0.8s, then loop.
+  var SUBJ_IN  = 520;    // subject scales in
+  var HOP_DRAW = 1180;   // each hop level takes this long to fully draw
+  var HOP_GAP  = 160;    // gap between hop levels starting
+  var HOLD     = 1800;
+  var FADEOUT  = 820;
+
+  var hopEdges = { 1: [], 2: [], 3: [] };
+  EDGES.forEach(function (e) { hopEdges[e.hop].push(e); });
+
+  // build hop schedule so total draw lands near 5.5s
+  var hopStart = {};
+  var tcur = SUBJ_IN;
+  [1, 2, 3].forEach(function (hop) {
+    hopStart[hop] = tcur;
+    tcur += HOP_DRAW + HOP_GAP;
+  });
+  var DRAW_END = tcur - HOP_GAP; // ~ 520 + 3*1180 + 2*160 = 4380... bump below
+  // stretch the final hop so the full reveal feels ~5.5s
+  DRAW_END = SUBJ_IN + 3 * HOP_DRAW + 2 * HOP_GAP; // 5500
+  var CYCLE = DRAW_END + HOLD + FADEOUT;
+
+  var badPathEdges = EDGES.filter(function (e) { return e.bad; });
+  var badSeq = badPathEdges.slice().sort(function (a, b) { return b.hop - a.hop; });
+
+  // settle pulse travelling back along the bad path toward the subject
+  var pulseGlow = el("circle", { r: 6, fill: COL.flagged, opacity: 0 });
+  var pulseDot = el("circle", { r: 2.6, fill: COL.flagged, opacity: 0 });
+  gPulse.appendChild(pulseGlow);
+  gPulse.appendChild(pulseDot);
+
+  function setEdgeProgress(e, p) {
+    e.node.style.strokeDashoffset = e.len * (1 - p);
+  }
+  function nodeOpacity(n, o) {
+    n.dom.setAttribute("opacity", o);
+    n.labelDom.setAttribute("opacity", o);
+  }
+  function nodeScale(n, s) {
+    n.dom.setAttribute("transform", "translate(" + n.x + "," + n.y + ") scale(" + s + ")");
+  }
+  function ss(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  // gentle overshoot for node pop
+  function pop(x) {
+    x = Math.max(0, Math.min(1, x));
+    var c = 1.70158;
+    var t = x - 1;
+    return 1 + t * t * ((c + 1) * t + c);
+  }
+
+  function resetCycle() {
+    EDGES.forEach(function (e) {
+      e.node.style.strokeDashoffset = e.len;
+      e.node.setAttribute("opacity", e.bad ? 0.92 : e.alpha);
+      e.scan.setAttribute("opacity", 0);
+      e.scanCore.setAttribute("opacity", 0);
+    });
+    NODES.forEach(function (n) { nodeOpacity(n, 0); nodeScale(n, 0.6); });
+    CHIPS.forEach(function (c) { c.dom.setAttribute("opacity", 0); });
+    pulseDot.setAttribute("opacity", 0);
+    pulseGlow.setAttribute("opacity", 0);
+    riskShown = 0;
+  }
+
+  // smooth count-up state for the risk readout
+  var riskShown = 0;
+  function renderRisk(v, settled) {
+    if (settled) {
+      riskVal.innerHTML = '<span class="num">0.84</span>' +
+        ' <span class="sep">·</span> <span style="color:var(--ink)">3-hop flagged ancestor</span>';
+      riskSub.textContent = "OFAC SDN lineage · 2 flagged ancestors";
+    } else {
+      riskVal.innerHTML = '<span class="num">' + v.toFixed(2) + '</span>';
+      riskSub.textContent = v > 0.2 ? "tracing flagged ancestors…" : "";
+    }
+  }
+
+  var startTime = null, raf = 0, lastT = 0;
+
+  function frame(ts) {
+    if (startTime === null) startTime = ts;
+    var t = (ts - startTime) % CYCLE;
+
+    if (t < lastT) { resetCycle(); }
+    var dt = t - lastT;
+    if (dt < 0) dt = t;
+    lastT = t;
+
+    if (t < DRAW_END + HOLD) {
+      svg.style.opacity = 1;
+
+      // subject scales + fades in
+      var sp = ss(t / SUBJ_IN);
+      nodeOpacity(SUBJ, sp);
+      nodeScale(SUBJ, 0.6 + 0.4 * pop(t / SUBJ_IN));
+
+      // hops draw outward; children pop in as their edge nears completion;
+      // a scan glow rides the drawing head of each edge.
+      [1, 2, 3].forEach(function (hop) {
+        var start = hopStart[hop];
+        var local = (t - start) / HOP_DRAW;
+        var p = ss(local);
+        if (local <= 0) {
+          hopEdges[hop].forEach(function (e) {
+            setEdgeProgress(e, 0);
+            e.scan.setAttribute("opacity", 0);
+            e.scanCore.setAttribute("opacity", 0);
+          });
+          return;
+        }
+        hopEdges[hop].forEach(function (e) {
+          setEdgeProgress(e, p);
+          // node pops in as the edge completes the last 40%
+          var np = ss((p - 0.6) / 0.4);
+          nodeOpacity(e.child, np);
+          nodeScale(e.child, 0.6 + 0.4 * pop((p - 0.55) / 0.45));
+
+          // scan glow along the freshly-drawn head (visible while drawing)
+          if (local > 0 && local < 1) {
+            var headLen = e.len * Math.min(1, p);
+            var pt = e.node.getPointAtLength(headLen);
+            var fade = Math.sin(p * Math.PI); // peak mid-draw, gone at ends
+            e.scan.setAttribute("cx", pt.x); e.scan.setAttribute("cy", pt.y);
+            e.scan.setAttribute("opacity", 0.16 * fade);
+            e.scanCore.setAttribute("cx", pt.x); e.scanCore.setAttribute("cy", pt.y);
+            e.scanCore.setAttribute("opacity", 0.7 * fade);
+          } else {
+            e.scan.setAttribute("opacity", 0);
+            e.scanCore.setAttribute("opacity", 0);
+          }
+        });
+      });
+
+      // address chips fade in shortly after their node lands
+      CHIPS.forEach(function (c) {
+        var nodeOp = parseFloat(c.node.dom.getAttribute("opacity")) || 0;
+        var cur = parseFloat(c.dom.getAttribute("opacity")) || 0;
+        var target = nodeOp > 0.7 ? 1 : 0;
+        // ease toward target for a soft fade-in
+        var next = cur + (target - cur) * Math.min(1, dt / 260);
+        c.dom.setAttribute("opacity", next);
+      });
+
+      // risk: target climbs by visible flagged ancestor; count up smoothly
+      var visBad = 0;
+      NODES.forEach(function (n) {
+        if (n.bad && parseFloat(n.dom.getAttribute("opacity")) > 0.55) visBad++;
+      });
+      var settled = t >= DRAW_END;
+      var target = settled ? 0.84 : Math.min(0.84, visBad * 0.3);
+      // smooth approach
+      riskShown += (target - riskShown) * Math.min(1, dt / 380);
+      if (Math.abs(target - riskShown) < 0.004) riskShown = target;
+      renderRisk(riskShown, settled && riskShown > 0.82);
+
+      // pulsing rings on visible flagged nodes
+      var ph = (t % 1700) / 1700;
+      NODES.forEach(function (n) {
+        if (!n.ring) return;
+        var vis = parseFloat(n.dom.getAttribute("opacity"));
+        if (vis > 0.4) {
+          var rp = ss(ph < 0.65 ? ph / 0.65 : 1);
+          n.ring.setAttribute("r", (n.r + 5) + rp * 11);
+          n.ring.setAttribute("opacity", vis * (1 - ph) * 0.65);
+        } else {
+          n.ring.setAttribute("opacity", 0);
+        }
+      });
+
+      // settle pulse travels the full bad path once it is drawn
+      var fullBad = t >= DRAW_END - 220;
+      if (fullBad && badSeq.length) {
+        var loopT = (((t - (DRAW_END - 220)) % 1900) / 1900);
+        var nb = badSeq.length;
+        var fIdx = loopT * nb;
+        var ei = Math.min(nb - 1, Math.floor(fIdx));
+        var ep = fIdx - ei;
+        var edge = badSeq[ei];
+        var pt2 = edge.node.getPointAtLength(edge.len * (1 - ep)); // ancestor -> subject
+        var fade2 = Math.sin(loopT * Math.PI);
+        pulseDot.setAttribute("cx", pt2.x); pulseDot.setAttribute("cy", pt2.y);
+        pulseDot.setAttribute("opacity", 0.9 * fade2 + 0.1);
+        pulseGlow.setAttribute("cx", pt2.x); pulseGlow.setAttribute("cy", pt2.y);
+        pulseGlow.setAttribute("opacity", 0.18 * fade2);
+      } else {
+        pulseDot.setAttribute("opacity", 0);
+        pulseGlow.setAttribute("opacity", 0);
+      }
+    } else {
+      // gentle fade-out before restart
+      svg.style.opacity = 1 - ss((t - (DRAW_END + HOLD)) / FADEOUT);
+      pulseDot.setAttribute("opacity", 0);
+      pulseGlow.setAttribute("opacity", 0);
+      EDGES.forEach(function (e) { e.scan.setAttribute("opacity", 0); e.scanCore.setAttribute("opacity", 0); });
+    }
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  // ---------- static (reduced motion) render ----------
+  function renderStatic() {
+    EDGES.forEach(function (e) {
+      e.node.style.strokeDashoffset = 0;
+      e.node.setAttribute("opacity", e.bad ? 0.92 : e.alpha);
+      e.scan.setAttribute("opacity", 0);
+      e.scanCore.setAttribute("opacity", 0);
+    });
+    NODES.forEach(function (n) { nodeOpacity(n, 1); nodeScale(n, 1); });
+    CHIPS.forEach(function (c) { c.dom.setAttribute("opacity", 1); });
+    NODES.forEach(function (n) {
+      if (n.ring) { n.ring.setAttribute("r", n.r + 7); n.ring.setAttribute("opacity", 0.5); }
+    });
+    if (badSeq.length) {
+      var e0 = badSeq[badSeq.length - 1]; // closest-to-subject bad edge
+      var pt = e0.node.getPointAtLength(e0.len * 0.5);
+      pulseDot.setAttribute("cx", pt.x); pulseDot.setAttribute("cy", pt.y);
+      pulseDot.setAttribute("opacity", 0.9);
+      pulseGlow.setAttribute("cx", pt.x); pulseGlow.setAttribute("cy", pt.y);
+      pulseGlow.setAttribute("opacity", 0.16);
+    }
+    renderRisk(0.84, true);
+    svg.style.opacity = 1;
+    var dot = document.querySelector(".cap.tr .dot");
+    if (dot) dot.style.animation = "none";
+  }
+
+  if (reduce) {
+    renderStatic();
+  } else {
+    resetCycle();
+    renderRisk(0, false);
+    raf = requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
