@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PEDIGRID — Lineage Tracing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e9edf4;
+    --surface: #ffffff;
+    --ink: #0b1120;
+    --secondary: #3a4660;
+    --hairline: rgba(11, 17, 32, 0.16);
+    --cobalt-fill: #0047ff;
+    --cobalt: #0b46e6;
+    --flagged: #d62828;
+    --success: #0a8f55;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .module {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    gap: 56px;
+    align-items: stretch;
+  }
+
+  /* ---------- LEFT COLUMN ---------- */
+  .left { padding-top: 6px; }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cobalt);
+    margin: 0 0 24px;
+  }
+  .kicker .lineage {
+    color: var(--secondary);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(30px, 3.4vw, 46px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--secondary);
+    font-size: 15.5px;
+    line-height: 1.55;
+    max-width: 46ch;
+    margin: 0;
+  }
+
+  .left-foot {
+    margin-top: 34px;
+    padding-top: 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .foot-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--secondary);
+    margin: 0;
+  }
+
+  /* ---------- RIGHT COLUMN ---------- */
+  .panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    height: 400px;
+    overflow: hidden;
+  }
+
+  .cap {
+    position: absolute;
+    z-index: 3;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--secondary);
+    pointer-events: none;
+  }
+  .cap.tl { top: 14px; left: 16px; }
+  .cap.tr {
+    top: 14px; right: 16px;
+    letter-spacing: 0.2em;
+    color: var(--cobalt);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .cap.tr .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cobalt);
+    box-shadow: 0 0 0 0 rgba(11,70,230,0.45);
+    animation: livepulse 2.2s ease-out infinite;
+  }
+  @keyframes livepulse {
+    0%   { box-shadow: 0 0 0 0 rgba(11,70,230,0.42); }
+    70%  { box-shadow: 0 0 0 6px rgba(11,70,230,0); }
+    100% { box-shadow: 0 0 0 0 rgba(11,70,230,0); }
+  }
+
+  .illus {
+    position: absolute;
+    z-index: 3;
+    bottom: 12px; right: 16px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    color: var(--secondary);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .stage { position: absolute; inset: 0; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* readout box */
+  .readout {
+    position: absolute;
+    z-index: 3;
+    left: 16px; bottom: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    pointer-events: none;
+  }
+  .readout .r-k {
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--secondary);
+  }
+  .readout .r-v {
+    font-size: 14px;
+    color: var(--ink);
+    margin-top: 3px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .readout .r-v .num {
+    color: var(--flagged);
+    font-weight: 500;
+  }
+  .readout .r-v .sep { color: var(--secondary); opacity: 0.55; }
+  .readout .r-sub {
+    font-size: 8.5px;
+    color: var(--flagged);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+    min-height: 11px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 960px) {
+    .page { padding: 56px 28px; }
+    .module {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+  @media (max-width: 480px) {
+    .page { padding: 44px 18px; }
+    .panel { height: 360px; }
+    .readout .r-v { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="module">
+      <!-- LEFT -->
+      <div class="left">
+        <p class="kicker">PEDIGRID&nbsp;&nbsp;<span class="lineage">Lineage tracing</span></p>
+        <h2 class="h2">Traces the bloodline of an address.</h2>
+        <p class="lede">N-hop lineage across known-bad wallets, weighted by distance and provenance. Pedigrid reconstructs the genealogy of risk — branch by branch, source by source.</p>
+        <div class="left-foot">
+          <p class="foot-label">Graph traversal · weighted distance</p>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="panel">
+          <span class="cap tl">PEDIGRID / live view</span>
+          <span class="cap tr"><span class="dot"></span>live</span>
+
+          <div class="stage">
+            <canvas id="grid" aria-hidden="true"></canvas>
+          </div>
+
+          <div class="readout">
+            <div class="r-k">Lineage risk</div>
+            <div class="r-v" id="risk-val"><span class="num">0.00</span></div>
+            <div class="r-sub" id="risk-sub"></div>
+          </div>
+
+          <span class="illus">Illustrative</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("grid");
+  var ctx = canvas.getContext("2d");
+  var riskVal = document.getElementById("risk-val");
+  var riskSub = document.getElementById("risk-sub");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var COL = {
+    cobalt: "#0b46e6",
+    cobaltFill: "#0047ff",
+    flagged: "#d62828",
+    ink: "#0b1120",
+    secondary: "#3a4660",
+    surface: "#ffffff"
+  };
+
+  // ---- design coordinate space (matches original viewBox feel) ----
+  var VW = 820, VH = 400;
+  var W = VW, H = VH, DPR = 1, scaleK = 1, offX = 0, offY = 0;
+
+  // ----------------------------------------------------------------
+  // Genealogy layout. Subject sits right; vessels branch left across
+  // 3 hop levels into ~12 ancestor nodes. The flagged lineage peels
+  // UPWARD as a clear side branch off the main horizontal axis.
+  // ----------------------------------------------------------------
+  var SUBJ = { id: "s", x: 690, y: 214, hop: 0, r: 9, subject: true,
+               label: "SUBJECT", chip: "0x84f3…c2e1" };
+
+  var NODES = [
+    SUBJ,
+    // hop 1 — neutral trunk stays roughly level; flagged branch peels upward
+    { id: "a1", x: 524, y: 210, hop: 1, r: 6.5, parent: "s" },
+    { id: "a2", x: 548, y: 132, hop: 1, r: 6.5, parent: "s", bad: true, chip: "bc1q…m2v8" },
+    { id: "a3", x: 522, y: 296, hop: 1, r: 6.5, parent: "s" },
+    // hop 2
+    { id: "b1", x: 352, y: 174, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b2", x: 356, y: 240, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b3", x: 392, y: 78,  hop: 2, r: 5.5, parent: "a2", bad: true,
+      flag: "Tornado Cash", flagSub: "mixer · @ 2 hops" },
+    { id: "b4", x: 350, y: 308, hop: 2, r: 5.5, parent: "a3" },
+    { id: "b5", x: 360, y: 352, hop: 2, r: 5.5, parent: "a3" },
+    // hop 3
+    { id: "c1", x: 168, y: 246, hop: 3, r: 4.5, parent: "b2" },
+    { id: "c2", x: 222, y: 54,  hop: 3, r: 4.5, parent: "b3", bad: true,
+      flag: "OFAC SDN", flagSub: "flagged · @ 3 hops" },
+    { id: "c3", x: 170, y: 326, hop: 3, r: 4.5, parent: "b4" },
+    { id: "c4", x: 176, y: 132, hop: 3, r: 4.5, parent: "b1" }
+  ];
+
+  var byId = {};
+  NODES.forEach(function (n) { byId[n.id] = n; });
+
+  // mark every node on a path terminating in a flagged hop-3 ancestor
+  NODES.forEach(function (n) {
+    if (n.bad && n.hop === 3) {
+      var cur = n;
+      while (cur) { cur.onBad = true; cur = cur.parent ? byId[cur.parent] : null; }
+    }
+  });
+
+  // ---- vessels (edges) parent -> child, organic tapered curves ----
+  var EDGES = [];
+  NODES.forEach(function (n) {
+    if (!n.parent) return;
+    var p = byId[n.parent];
+    // thickness: thicker/darker near subject, thinner toward ancestors
+    var w0 = [0, 7.0, 4.2, 2.4][n.hop] || 2.0;     // width at parent (subject side)
+    var w1 = [0, 4.2, 2.4, 1.3][n.hop] || 1.1;     // width at child (ancestor side)
+    var alpha = [0, 0.92, 0.6, 0.4][n.hop] || 0.34;
+    var bad = !!(n.onBad && p.onBad);
+    // higher weight closer to subject & on the bad path (denser flow)
+    var weight = [0, 1.0, 0.66, 0.42][n.hop] || 0.4;
+    if (bad) weight = Math.min(1, weight + 0.22);
+    EDGES.push({
+      from: p, to: n, w0: w0, w1: w1, alpha: alpha, bad: bad,
+      hop: n.hop, child: n, weight: weight
+    });
+  });
+  EDGES.sort(function (a, b) { return a.hop - b.hop; });
+
+  // Build a cubic bezier per edge (organic S-curve, horizontal tangents).
+  function buildCurve(e) {
+    var p = e.from, c = e.child;
+    var mx = (p.x + c.x) * 0.5;
+    // slight organic sag toward the child for vein-like droop
+    var bow = (c.hop === e.hop ? 1 : 1) * 0;
+    e.p0 = { x: p.x, y: p.y };
+    e.p1 = { x: mx, y: p.y + bow };
+    e.p2 = { x: mx, y: c.y - bow };
+    e.p3 = { x: c.x, y: c.y };
+  }
+  EDGES.forEach(buildCurve);
+
+  function bez(e, t) {
+    var u = 1 - t, uu = u * u, tt = t * t;
+    var a = uu * u, b = 3 * uu * t, cc = 3 * u * tt, d = tt * t;
+    return {
+      x: a * e.p0.x + b * e.p1.x + cc * e.p2.x + d * e.p3.x,
+      y: a * e.p0.y + b * e.p1.y + cc * e.p2.y + d * e.p3.y
+    };
+  }
+  // approximate arc-length sampling for steady particle motion
+  function buildSamples(e) {
+    var N = 48, pts = [], lens = [0], total = 0, prev = bez(e, 0);
+    pts.push(prev);
+    for (var i = 1; i <= N; i++) {
+      var pt = bez(e, i / N);
+      total += Math.hypot(pt.x - prev.x, pt.y - prev.y);
+      lens.push(total); pts.push(pt); prev = pt;
+    }
+    e.pts = pts; e.lens = lens; e.total = total; e.N = N;
+  }
+  EDGES.forEach(buildSamples);
+
+  // point at normalized arc-length s in [0,1]
+  function pointAt(e, s) {
+    var target = s * e.total, lo = 0, hi = e.N;
+    while (lo < hi) {
+      var mid = (lo + hi) >> 1;
+      if (e.lens[mid] < target) lo = mid + 1; else hi = mid;
+    }
+    var i = Math.max(1, lo);
+    var l0 = e.lens[i - 1], l1 = e.lens[i];
+    var f = l1 > l0 ? (target - l0) / (l1 - l0) : 0;
+    var a = e.pts[i - 1], b = e.pts[i];
+    return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
+  }
+
+  // tangent-aware width along the vessel (taper from w0 at subject to w1 at ancestor)
+  function widthAt(e, s) { return e.w0 + (e.w1 - e.w0) * s; }
+
+  // ---- particles: continuous bloodflow ancestor -> subject ----
+  // Each particle lives on a chain of edges from its ancestor down to subject.
+  // We seed particles per edge for simplicity; they travel parent<-...->child
+  // visually flowing child -> parent (toward subject). s goes 1 -> 0.
+  var particles = [];
+  function seedParticles() {
+    particles.length = 0;
+    EDGES.forEach(function (e) {
+      var count = Math.round(2 + e.weight * 6); // denser on higher-weight vessels
+      for (var i = 0; i < count; i++) {
+        particles.push({
+          edge: e,
+          s: Math.random(),            // 1=ancestor side, 0=subject side
+          speed: (0.10 + Math.random() * 0.06) * (0.7 + e.weight * 0.6),
+          size: 0.9 + Math.random() * 0.7 + e.weight * 0.5,
+          jitter: (Math.random() - 0.5) * 0.6
+        });
+      }
+    });
+  }
+  seedParticles();
+
+  // settle pulse (contamination) traveling inward along worst path
+  var badPath = EDGES.filter(function (e) { return e.bad; })
+                     .sort(function (a, b) { return b.hop - a.hop; }); // far -> near
+
+  // ---------- DPR / sizing ----------
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    // fit the 820x400 design space, contain
+    scaleK = Math.min(W / VW, H / VH);
+    offX = (W - VW * scaleK) / 2;
+    offY = (H - VH * scaleK) / 2;
+  }
+
+  // map design coords -> device pixels
+  function applyTransform() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.translate(offX, offY);
+    ctx.scale(scaleK, scaleK);
+  }
+
+  // ---------- easing ----------
+  function ss(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  function easeOut(x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 2.4); }
+  function pop(x) {
+    x = Math.max(0, Math.min(1, x));
+    var c = 1.70158, t = x - 1;
+    return 1 + t * t * ((c + 1) * t + c);
+  }
+
+  // ---------- color helpers ----------
+  function rgba(hex, a) {
+    var r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+    return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+  }
+  function mix(h1, h2, t) {
+    var r1 = parseInt(h1.slice(1,3),16), g1 = parseInt(h1.slice(3,5),16), b1 = parseInt(h1.slice(5,7),16);
+    var r2 = parseInt(h2.slice(1,3),16), g2 = parseInt(h2.slice(3,5),16), b2 = parseInt(h2.slice(5,7),16);
+    return "rgb(" + Math.round(r1+(r2-r1)*t) + "," + Math.round(g1+(g2-g1)*t) + "," + Math.round(b1+(b2-b1)*t) + ")";
+  }
+
+  // ---------- timeline ----------
+  var SUBJ_IN  = 520;
+  var HOP_DRAW = 1180;
+  var HOP_GAP  = 160;
+  var DRAW_END = SUBJ_IN + 3 * HOP_DRAW + 2 * HOP_GAP; // ~5500
+  var IGNITE   = DRAW_END + 250;       // flagged nodes ignite red
+  var CONTAM   = 1700;                 // contamination sweep duration
+  var SETTLE   = IGNITE + CONTAM;      // risk fully landed
+  var HOLD     = 1500;
+  var CYCLE    = SETTLE + HOLD + 600;  // gentle loop
+
+  var hopStart = { 1: SUBJ_IN, 2: SUBJ_IN + HOP_DRAW + HOP_GAP, 3: SUBJ_IN + 2 * (HOP_DRAW + HOP_GAP) };
+
+  // ---------- risk readout ----------
+  var riskShown = 0;
+  function renderRisk(v, settled) {
+    if (settled) {
+      riskVal.innerHTML = '<span class="num">0.84</span>' +
+        ' <span class="sep">·</span> <span style="color:var(--ink)">3-hop flagged ancestor</span>';
+      riskSub.textContent = "OFAC SDN lineage · 2 flagged ancestors";
+    } else {
+      riskVal.innerHTML = '<span class="num">' + v.toFixed(2) + '</span>';
+      riskSub.textContent = v > 0.18 ? "tracing flagged ancestors…" : "";
+    }
+  }
+
+  // ---------- vessel drawing ----------
+  // Draw a tapered vessel from s=0 (subject side) up to s=grow (ancestor side).
+  // contam in [0,1] = how far red contamination has crept inward on bad path.
+  function drawVessel(e, grow, redLevel) {
+    if (grow <= 0.001) return;
+    var steps = 26;
+    var maxS = grow;
+    // base vessel color blends cobalt -> red by redLevel on the segment that's contaminated
+    for (var seg = 0; seg < steps; seg++) {
+      var s0 = (seg / steps) * maxS;
+      var s1 = ((seg + 1) / steps) * maxS;
+      var sm = (s0 + s1) * 0.5;
+      var p0 = pointAt(e, s0), p1 = pointAt(e, s1);
+      var w = widthAt(e, sm) * (0.5 + 0.5 * Math.min(1, grow / 0.4 + sm));
+      // taper a little extra at the very tip
+      if (sm > maxS - 0.06) w *= Math.max(0.35, (maxS - sm) / 0.06);
+
+      var col, alpha = e.alpha;
+      if (e.bad && redLevel > 0) {
+        // contamination flows from ancestor (s=1) inward (s->0):
+        // a point at arc s is red if redLevel >= (1 - s)
+        var redHere = Math.max(0, Math.min(1, (redLevel - (1 - sm)) / 0.18 + 0.5));
+        col = mix(COL.cobalt, COL.flagged, redHere);
+        alpha = e.alpha * (0.85 + 0.15 * redHere);
+      } else {
+        col = COL.cobalt;
+      }
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.strokeStyle = rgba_col(col, alpha);
+      ctx.lineWidth = Math.max(0.5, w);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke();
+    }
+  }
+  // rgba from an "rgb(...)" or hex string
+  function rgba_col(col, a) {
+    if (col.charAt(0) === "#") return rgba(col, a);
+    return col.replace("rgb(", "rgba(").replace(")", "," + a + ")");
+  }
+
+  // ---------- node drawing ----------
+  function drawNode(n, op, scale, redIgnite, coreFlush, t) {
+    if (op <= 0.001) return;
+    ctx.save();
+    ctx.translate(n.x, n.y);
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = op;
+
+    if (n.subject) {
+      // outer faint ring
+      ctx.beginPath(); ctx.arc(0, 0, n.r + 7, 0, Math.PI * 2);
+      ctx.strokeStyle = rgba(COL.cobalt, 0.35); ctx.lineWidth = 1; ctx.stroke();
+      // red flush ring when contamination lands
+      if (coreFlush > 0) {
+        var pulse = 0.5 + 0.5 * Math.sin(t / 520);
+        ctx.beginPath(); ctx.arc(0, 0, n.r + 5 + coreFlush * 3, 0, Math.PI * 2);
+        ctx.strokeStyle = rgba(COL.flagged, 0.55 * coreFlush * (0.7 + 0.3 * pulse));
+        ctx.lineWidth = 1.6; ctx.stroke();
+        // soft glow
+        var g = ctx.createRadialGradient(0, 0, n.r, 0, 0, n.r + 16);
+        g.addColorStop(0, rgba(COL.flagged, 0.22 * coreFlush));
+        g.addColorStop(1, rgba(COL.flagged, 0));
+        ctx.beginPath(); ctx.arc(0, 0, n.r + 16, 0, Math.PI * 2);
+        ctx.fillStyle = g; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(0, 0, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = coreFlush > 0 ? mix(COL.cobalt, COL.flagged, 0.35 * coreFlush) : COL.cobalt;
+      ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, n.r - 3, 0, Math.PI * 2);
+      ctx.fillStyle = COL.surface; ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2);
+      ctx.fillStyle = coreFlush > 0 ? COL.flagged : COL.cobalt; ctx.fill();
+    } else if (n.bad) {
+      var redC = redIgnite;
+      var col = mix(COL.cobalt, COL.flagged, redC);
+      // ignite ring
+      if (redC > 0) {
+        var ph = (t % 1700) / 1700;
+        ctx.beginPath(); ctx.arc(0, 0, n.r + 5 + ss(ph) * 9, 0, Math.PI * 2);
+        ctx.strokeStyle = rgba(COL.flagged, redC * (1 - ph) * 0.6);
+        ctx.lineWidth = 1.2; ctx.stroke();
+        var g2 = ctx.createRadialGradient(0, 0, n.r, 0, 0, n.r + 13);
+        g2.addColorStop(0, rgba(COL.flagged, 0.2 * redC));
+        g2.addColorStop(1, rgba(COL.flagged, 0));
+        ctx.beginPath(); ctx.arc(0, 0, n.r + 13, 0, Math.PI * 2);
+        ctx.fillStyle = g2; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(0, 0, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = COL.surface; ctx.fill();
+      ctx.lineWidth = 1.6; ctx.strokeStyle = col; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, n.r - 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = col; ctx.fill();
+    } else {
+      var hopOp = [1, 1, 0.78, 0.55][n.hop] || 0.5;
+      ctx.beginPath(); ctx.arc(0, 0, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = COL.surface; ctx.fill();
+      ctx.globalAlpha = op * hopOp;
+      ctx.lineWidth = 1.3; ctx.strokeStyle = COL.cobalt; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, Math.max(1.6, n.r - 3), 0, Math.PI * 2);
+      ctx.fillStyle = COL.cobalt; ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // ---------- labels ----------
+  function setFont(px, weight) {
+    ctx.font = (weight || "400") + " " + px + "px 'IBM Plex Mono', monospace";
+  }
+  function drawLabels(opByNode, t) {
+    ctx.textBaseline = "alphabetic";
+    NODES.forEach(function (n) {
+      var op = opByNode[n.id] || 0;
+      if (op <= 0.02) return;
+      ctx.globalAlpha = op;
+      if (n.subject) {
+        setFont(8.5, "400");
+        ctx.fillStyle = COL.ink;
+        ctx.textAlign = "left";
+        // letter-spacing emulation
+        drawTracked(n.label, n.x + n.r + 12, n.y - 4, 1.4);
+      } else if (n.flag) {
+        var redC = opByNode["_red_" + n.id] || 0;
+        setFont(9, "500");
+        ctx.fillStyle = rgba_hex_mix(COL.secondary, COL.flagged, redC);
+        ctx.textAlign = "right";
+        ctx.fillText(n.flag, n.x - n.r - 8, n.y - 3);
+        setFont(8, "400");
+        ctx.globalAlpha = op * 0.85;
+        ctx.fillStyle = rgba_hex_mix(COL.secondary, COL.flagged, redC);
+        ctx.fillText(n.flagSub, n.x - n.r - 8, n.y + 9);
+      } else if (n.hop >= 1) {
+        setFont(8.5, "400");
+        ctx.fillStyle = COL.secondary;
+        ctx.textAlign = "center";
+        drawTracked(n.hop + (n.hop === 1 ? " HOP" : " HOPS"), n.x, n.y - n.r - 8, 1.0, true);
+      }
+    });
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "left";
+  }
+  function rgba_hex_mix(h1, h2, t) {
+    return mix(h1, h2, Math.max(0, Math.min(1, t)));
+  }
+  // crude letter-spacing by drawing char by char
+  function drawTracked(str, x, y, tracking, center) {
+    var widths = [], tw = 0, i;
+    for (i = 0; i < str.length; i++) { var w = ctx.measureText(str[i]).width + tracking; widths.push(w); tw += w; }
+    var cx = center ? x - tw / 2 : (ctx.textAlign === "left" ? x : x - tw);
+    var oldAlign = ctx.textAlign; ctx.textAlign = "left";
+    for (i = 0; i < str.length; i++) { ctx.fillText(str[i], cx, y); cx += widths[i]; }
+    ctx.textAlign = oldAlign;
+  }
+
+  // ---------- address chips ----------
+  var CHIPS = [];
+  NODES.forEach(function (n) {
+    if (!n.chip) return;
+    CHIPS.push({ node: n, op: 0 });
+  });
+  function drawChips(t) {
+    CHIPS.forEach(function (c) {
+      if (c.op <= 0.02) return;
+      var n = c.node;
+      ctx.globalAlpha = c.op;
+      setFont(8.5, "400");
+      var below = n.subject ? n.y + n.r + 24 : n.y + n.r + 16;
+      var tw = ctx.measureText(n.chip).width + 14;
+      var cx = n.subject ? n.x + n.r + 12 + tw / 2 : n.x;
+      ctx.fillStyle = COL.surface;
+      ctx.strokeStyle = rgba(COL.ink, 0.16);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(cx - tw / 2, below - 10, tw, 14);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL.secondary;
+      ctx.textAlign = "center";
+      ctx.fillText(n.chip, cx, below + 0.5);
+      ctx.textAlign = "left";
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // ---------- particle draw ----------
+  function drawParticles(growByHop, redLevel, globalFlow) {
+    EDGES.forEach(function (e) {
+      var grow = growByHop[e.hop];
+      if (grow <= 0.05) return;
+    });
+    particles.forEach(function (pt) {
+      var e = pt.edge;
+      var grow = growByHop[e.hop];
+      if (grow <= 0.08) return;
+      // particle only visible within drawn portion of vessel (s <= grow)
+      if (pt.s > grow) return;
+      var pos = pointAt(e, pt.s);
+      // offset slightly perpendicular for organic spread (very subtle)
+      var w = widthAt(e, pt.s);
+      var size = pt.size * (0.7 + 0.5 * w / 6);
+      // color: red if contamination has reached this point on bad path
+      var col = COL.cobalt, glowA = 0.0;
+      if (e.bad && redLevel > 0) {
+        var redHere = (redLevel - (1 - pt.s)) > 0 ? 1 : 0;
+        if (redHere) { col = COL.flagged; glowA = 0.16; }
+      }
+      // fade particle near both ends of its vessel segment
+      var endFade = Math.min(1, pt.s / 0.08) * Math.min(1, (grow - pt.s) / 0.08 + 0.6);
+      var a = (0.5 + 0.4 * e.weight) * Math.min(1, endFade) * globalFlow;
+      if (a <= 0.01) return;
+      if (glowA > 0) {
+        ctx.beginPath(); ctx.arc(pos.x, pos.y, size * 2.4, 0, Math.PI * 2);
+        ctx.fillStyle = rgba(col, glowA * globalFlow); ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = rgba(col, a); ctx.fill();
+    });
+  }
+
+  // faint backdrop grid
+  function drawGrid() {
+    ctx.strokeStyle = rgba(COL.secondary, 0.05);
+    ctx.lineWidth = 1;
+    var gx, gy;
+    for (gx = 0; gx <= VW; gx += 56) {
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, VH); ctx.stroke();
+    }
+    for (gy = 0; gy <= VH; gy += 56) {
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(VW, gy); ctx.stroke();
+    }
+  }
+
+  // ---------- main loop ----------
+  var startTime = null, lastTs = 0;
+
+  function computeState(t) {
+    // grow factor per hop level (vessels extend outward hop by hop)
+    var growByHop = { 1: 0, 2: 0, 3: 0 };
+    [1, 2, 3].forEach(function (hop) {
+      var local = (t - hopStart[hop]) / HOP_DRAW;
+      growByHop[hop] = easeOut(local);
+    });
+    // node opacities + scales
+    var opByNode = {}, scaleByNode = {}, redByNode = {};
+    // subject
+    var sp = ss(t / SUBJ_IN);
+    opByNode["s"] = sp; scaleByNode["s"] = 0.6 + 0.4 * pop(Math.min(1, t / SUBJ_IN));
+
+    NODES.forEach(function (n) {
+      if (n.subject) return;
+      var grow = growByHop[n.hop];
+      var np = ss((grow - 0.55) / 0.45);
+      opByNode[n.id] = np;
+      scaleByNode[n.id] = 0.6 + 0.4 * pop(Math.min(1, (grow - 0.5) / 0.5));
+    });
+
+    // contamination / ignite
+    var redLevel = 0, coreFlush = 0, igniteAmt = 0;
+    if (t >= IGNITE) {
+      var ct = ss((t - IGNITE) / CONTAM);
+      redLevel = ct;          // 0..1 creeping inward
+      igniteAmt = ss((t - IGNITE) / 420);
+      coreFlush = ss((t - (IGNITE + CONTAM * 0.7)) / (CONTAM * 0.4));
+    }
+    NODES.forEach(function (n) {
+      if (n.bad) {
+        // bad nodes ignite progressively from far ancestor inward
+        var nodeReach = n.hop === 3 ? 0.0 : (n.hop === 2 ? 0.45 : 0.85);
+        redByNode[n.id] = igniteAmt > 0 ? ss((redLevel - nodeReach) / 0.2) * igniteAmt : 0;
+        opByNode["_red_" + n.id] = redByNode[n.id];
+      }
+    });
+
+    // risk count-up
+    var settled = t >= SETTLE - 250;
+    var target;
+    if (t < IGNITE) {
+      // climbs gently as flagged nodes appear
+      var visBad = 0;
+      NODES.forEach(function (n) { if (n.bad && (opByNode[n.id] || 0) > 0.5) visBad++; });
+      target = Math.min(0.5, visBad * 0.16);
+    } else {
+      target = 0.2 + 0.64 * redLevel;
+    }
+    return {
+      growByHop: growByHop, opByNode: opByNode, scaleByNode: scaleByNode,
+      redByNode: redByNode, redLevel: redLevel, coreFlush: coreFlush,
+      target: target, settled: settled
+    };
+  }
+
+  function frame(ts) {
+    if (startTime === null) startTime = ts;
+    var t = (ts - startTime) % CYCLE;
+    var dt = ts - lastTs; lastTs = ts;
+    if (dt < 0 || dt > 60) dt = 16;
+
+    // global fade for loop end
+    var globalOp = 1;
+    if (t > SETTLE + HOLD) {
+      globalOp = 1 - ss((t - (SETTLE + HOLD)) / 600);
+    }
+
+    var st = computeState(t);
+
+    // advance particles
+    var flowActive = t > SUBJ_IN;
+    particles.forEach(function (p) {
+      p.s -= p.speed * (dt / 1000);       // flow ancestor -> subject (s:1->0)
+      if (p.s < 0) p.s += 1;              // wrap to ancestor side
+    });
+
+    // risk readout (smooth)
+    riskShown += (st.target - riskShown) * Math.min(1, dt / 380);
+    if (Math.abs(st.target - riskShown) < 0.004) riskShown = st.target;
+    renderRisk(riskShown, st.settled && riskShown > 0.82);
+
+    // ---- render ----
+    applyTransform();
+    ctx.clearRect(-offX / scaleK, -offY / scaleK, W / scaleK, H / scaleK);
+    ctx.globalAlpha = 1;
+    canvas.style.opacity = globalOp;
+
+    drawGrid();
+
+    // vessels
+    EDGES.forEach(function (e) {
+      var grow = st.growByHop[e.hop];
+      drawVessel(e, grow, e.bad ? st.redLevel : 0);
+    });
+
+    // particles (bloodflow) — over vessels, under nodes
+    var flowFade = ss((t - SUBJ_IN) / 700);
+    drawParticles(st.growByHop, st.redLevel, flowFade);
+
+    // nodes
+    NODES.forEach(function (n) {
+      var coreFlush = n.subject ? st.coreFlush : 0;
+      drawNode(n, st.opByNode[n.id] || 0, st.scaleByNode[n.id] || 0.6,
+               st.redByNode[n.id] || 0, coreFlush, t);
+    });
+
+    // chips fade toward target
+    CHIPS.forEach(function (c) {
+      var nodeOp = st.opByNode[c.node.id] || 0;
+      var tgt = nodeOp > 0.7 ? 1 : 0;
+      c.op += (tgt - c.op) * Math.min(1, dt / 260);
+    });
+    drawChips(t);
+
+    // labels
+    drawLabels(st.opByNode, t);
+
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- static (reduced motion) ----------
+  function renderStatic() {
+    resize();
+    applyTransform();
+    ctx.clearRect(-offX / scaleK, -offY / scaleK, W / scaleK, H / scaleK);
+    drawGrid();
+    EDGES.forEach(function (e) { drawVessel(e, 1, e.bad ? 1 : 0); });
+    // no particles in static frame
+    NODES.forEach(function (n) {
+      var red = n.bad ? 1 : 0;
+      var flush = n.subject ? 1 : 0;
+      drawNode(n, 1, 1, red, flush, 0);
+    });
+    var opAll = {};
+    NODES.forEach(function (n) {
+      opAll[n.id] = 1;
+      if (n.bad) opAll["_red_" + n.id] = 1;
+    });
+    CHIPS.forEach(function (c) { c.op = 1; });
+    drawChips(0);
+    drawLabels(opAll, 0);
+    renderRisk(0.84, true);
+    var dot = document.querySelector(".cap.tr .dot");
+    if (dot) dot.style.animation = "none";
+  }
+
+  // ---------- init ----------
+  var resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (reduce) renderStatic(); else resize();
+    }, 120);
+  });
+
+  if (reduce) {
+    renderStatic();
+  } else {
+    resize();
+    renderRisk(0, false);
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
