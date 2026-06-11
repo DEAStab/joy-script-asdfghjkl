@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PEDIGRID — Radial hop-ring map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e9edf4;
+    --surface: #ffffff;
+    --ink: #0b1120;
+    --ink-soft: #3a4660;
+    --hairline: rgba(11, 17, 32, 0.16);
+    --cobalt-fill: #0047ff;
+    --cobalt: #0b46e6;
+    --threat: #d62828;
+    --success: #0a8f55;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    gap: 56px;
+    align-items: center;
+  }
+
+  /* ---- LEFT column ---- */
+  .copy { position: relative; }
+
+  .kicker {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+  }
+  .kicker .name {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cobalt);
+  }
+  .kicker .tag {
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(30px, 3.4vw, 46px);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--ink);
+    margin: 26px 0 0;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    line-height: 1.55;
+    margin: 22px 0 0;
+    max-width: 52ch;
+  }
+
+  .foot {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hairline);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- RIGHT column ---- */
+  .panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    height: 400px;
+    overflow: hidden;
+  }
+
+  .panel .cap {
+    position: absolute;
+    z-index: 3;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--ink-soft);
+  }
+  .cap.tl { top: 12px; left: 14px; }
+  .cap.tr {
+    top: 12px; right: 14px;
+    color: var(--cobalt);
+    letter-spacing: 0.18em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .cap.tr .dot {
+    width: 6px; height: 6px;
+    background: var(--cobalt);
+    border-radius: 50%;
+    display: inline-block;
+    animation: livepulse 2.4s ease-in-out infinite;
+  }
+  @keyframes livepulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .cap.illus {
+    bottom: 11px; right: 14px;
+    letter-spacing: 0.16em;
+    opacity: 0.7;
+  }
+
+  /* ---- legend (top-mid right) ---- */
+  .legend {
+    position: absolute;
+    z-index: 3;
+    top: 34px; right: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+  .legend .lg { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .legend .sw { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: none; }
+  .legend .sw.cobalt { background: var(--cobalt-fill); }
+  .legend .sw.faint { background: rgba(11,70,230,0.32); }
+  .legend .sw.red { background: var(--threat); }
+
+  /* ---- readout (bottom-left) ---- */
+  .readout {
+    position: absolute;
+    bottom: 11px; left: 14px;
+    z-index: 3;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .readout .val { color: var(--ink); }
+  .readout .val.flagged { color: var(--threat); }
+  .readout .lbl { opacity: 0.72; text-transform: uppercase; letter-spacing: 0.16em; font-size: 8.5px; }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 960px) {
+    .page { padding: 56px 24px; }
+    .row { grid-template-columns: 1fr; gap: 36px; }
+  }
+  @media (max-width: 440px) {
+    .page { padding: 40px 16px; }
+    .panel { height: 360px; }
+    .legend { font-size: 8px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <div class="row">
+      <!-- LEFT -->
+      <section class="copy">
+        <div class="kicker">
+          <span class="name">PEDIGRID</span>
+          <span class="tag">Lineage tracing</span>
+        </div>
+        <h2>Traces the bloodline of an address.</h2>
+        <p class="lede">
+          N-hop lineage across known-bad wallets, weighted by distance and
+          provenance. Pedigrid reconstructs the genealogy of risk — branch by
+          branch, source by source.
+        </p>
+        <div class="foot">Graph traversal · weighted distance</div>
+      </section>
+
+      <!-- RIGHT -->
+      <section>
+        <div class="panel">
+          <div class="cap tl">PEDIGRID / live view</div>
+          <div class="cap tr"><span class="dot"></span>live</div>
+          <div class="cap illus">Illustrative</div>
+
+          <div class="legend">
+            <div class="lg"><span>hop = distance</span></div>
+            <div class="lg"><span>inner / near</span><span class="sw cobalt"></span></div>
+            <div class="lg"><span>outer / far</span><span class="sw faint"></span></div>
+            <div class="lg"><span>flagged</span><span class="sw red"></span></div>
+          </div>
+
+          <div class="readout">
+            <div class="lbl">Weighted lineage risk</div>
+            <div><span class="val" id="riskVal">0.00</span> <span id="riskNote">scanning…</span></div>
+          </div>
+
+          <canvas id="grid"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  var COLOR = {
+    ink: "#0b1120",
+    inkSoft: "#3a4660",
+    cobalt: "#0b46e6",
+    cobaltFill: "#0047ff",
+    threat: "#d62828",
+    success: "#0a8f55",
+    cobaltRgb: "11,70,230",
+    threatRgb: "214,40,40",
+    inkSoftRgb: "58,70,96"
+  };
+
+  var canvas = document.getElementById("grid");
+  var ctx = canvas.getContext("2d");
+  var riskValEl = document.getElementById("riskVal");
+  var riskNoteEl = document.getElementById("riskNote");
+
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------------------------------------------------------------------------
+  // RADIAL HOP-RING MODEL
+  // The subject sits at the centre. Ancestors live on one of 3 concentric rings
+  // by hop distance. Each node carries an ANGLE (radians, 0 = up) and its hop.
+  // Edges radiate outward; a parent on ring k connects to children on ring k+1.
+  // ---------------------------------------------------------------------------
+  var NODES = [
+    // id, hop, angle(deg, 0=up clockwise), kind, label, sub
+    { id: 0,  hop: 0, deg: 0,    kind: "subject", label: "SUBJECT", addr: "0x84f3…c2e1" },
+
+    // ring 1 (1 hop)
+    { id: 1,  hop: 1, deg: -52,  kind: "node" },
+    { id: 2,  hop: 1, deg: 64,   kind: "node", addr: "bc1q…m2v8" },
+    { id: 3,  hop: 1, deg: 186,  kind: "node" },
+
+    // ring 2 (2 hops)
+    { id: 4,  hop: 2, deg: -74,  kind: "node" },
+    { id: 5,  hop: 2, deg: -20,  kind: "flag", label: "Tornado Cash", sub: "@ 2 hops" },
+    { id: 6,  hop: 2, deg: 52,   kind: "node" },
+    { id: 7,  hop: 2, deg: 100,  kind: "node" },
+    { id: 8,  hop: 2, deg: 170,  kind: "node" },
+    { id: 9,  hop: 2, deg: 214,  kind: "node" },
+
+    // ring 3 (3 hops)
+    { id: 10, hop: 3, deg: -96,  kind: "node" },
+    { id: 11, hop: 3, deg: -36,  kind: "flag", label: "OFAC SDN", sub: "@ 3 hops" },
+    { id: 12, hop: 3, deg: 46,   kind: "node" },
+    { id: 13, hop: 3, deg: 158,  kind: "node" }
+  ];
+
+  // parent -> child (always crosses one ring outward)
+  var EDGES = [
+    { a: 0, b: 1 }, { a: 0, b: 2 }, { a: 0, b: 3 },
+    { a: 1, b: 4 }, { a: 1, b: 5 },
+    { a: 2, b: 6 }, { a: 2, b: 7 },
+    { a: 3, b: 8 }, { a: 3, b: 9 },
+    { a: 5, b: 10 }, { a: 5, b: 11 },
+    { a: 6, b: 12 },
+    { a: 8, b: 13 }
+  ];
+
+  // The RISK PATH: flagged OFAC SDN (3 hops) -> Tornado Cash (2 hops, also
+  // flagged) -> node 1 (1 hop) -> subject. Provenance converging on subject.
+  var RISKPATH = [11, 5, 1, 0]; // outer-first
+
+  // hop ring labels
+  var RING_LABELS = ["", "1 hop", "2 hops", "3 hops"];
+
+  // ---- timeline (ms) -------------------------------------------------------
+  var T = {
+    rings:  [200, 1100],   // rings draw in
+    hop1:   [900, 1700],
+    hop2:   [1700, 2700],
+    hop3:   [2700, 3900],
+    risk:   [3900, 5100],  // red path ignites + risk climbs
+    hold:   [5100, 7200],
+    fade:   [7200, 7800],
+    cycle:  7800
+  };
+
+  // ---- geometry ------------------------------------------------------------
+  var W = 0, H = 0, dpr = 1;
+  var cx = 0, cy = 0;
+  var ringR = [0, 0, 0, 0]; // radius per hop level
+
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = rect.width;
+    H = rect.height;
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // centre is nudged left a touch to leave breathing room for legend
+    cx = W * 0.46;
+    cy = H * 0.52;
+    var maxR = Math.min(W, H);
+    // outermost ring should fit comfortably inside the panel
+    var rMax = Math.min(cx, W - cx, cy, H - cy) - 26;
+    rMax = Math.max(70, rMax);
+    ringR[1] = rMax * 0.40;
+    ringR[2] = rMax * 0.70;
+    ringR[3] = rMax * 1.0;
+  }
+
+  // position of a node in canvas space
+  function nodeX(n) {
+    if (n.hop === 0) return cx;
+    var a = (n.deg - 90) * Math.PI / 180; // 0deg = up
+    return cx + Math.cos(a) * ringR[n.hop];
+  }
+  function nodeY(n) {
+    if (n.hop === 0) return cy;
+    var a = (n.deg - 90) * Math.PI / 180;
+    return cy + Math.sin(a) * ringR[n.hop];
+  }
+
+  function nodeById(id) {
+    for (var i = 0; i < NODES.length; i++) if (NODES[i].id === id) return NODES[i];
+    return null;
+  }
+
+  // ---- easing --------------------------------------------------------------
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOut(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function clamp01(t) { return t < 0 ? 0 : t > 1 ? 1 : t; }
+  function inWindow(t, win) { return clamp01((t - win[0]) / (win[1] - win[0])); }
+  function rgba(rgb, a) { return "rgba(" + rgb + "," + a + ")"; }
+
+  // distance weighting: inner = brighter + thicker + more saturated cobalt
+  function edgeWeight(hop) {
+    if (hop === 1) return { w: 2.0, alpha: 0.85, rgb: COLOR.cobaltRgb };
+    if (hop === 2) return { w: 1.4,  alpha: 0.50, rgb: COLOR.cobaltRgb };
+    return { w: 0.95, alpha: 0.28, rgb: COLOR.cobaltRgb };
+  }
+  function nodeRadius(n) {
+    if (n.kind === "subject") return 6.5;
+    if (n.kind === "flag") return 4.8;
+    if (n.hop === 1) return 4.3;
+    if (n.hop === 2) return 3.7;
+    return 3.0;
+  }
+
+  // risk-path membership sets
+  var riskEdgeSet = {};
+  (function () {
+    for (var i = 0; i < RISKPATH.length - 1; i++) {
+      riskEdgeSet[RISKPATH[i] + "-" + RISKPATH[i + 1]] = true;
+      riskEdgeSet[RISKPATH[i + 1] + "-" + RISKPATH[i]] = true;
+    }
+  })();
+  function isRiskEdge(e) { return riskEdgeSet[e.a + "-" + e.b]; }
+  var riskNodeSet = {};
+  RISKPATH.forEach(function (id) { riskNodeSet[id] = true; });
+
+  // which timeline window does an edge's destination ring belong to
+  function edgeWindow(dstHop) {
+    if (dstHop === 1) return T.hop1;
+    if (dstHop === 2) return T.hop2;
+    return T.hop3;
+  }
+
+  // ---- background: concentric hop rings + faint radial spokes --------------
+  function drawRings(t) {
+    var prog = easeOut(inWindow(t, T.rings));
+    if (prog <= 0) return;
+
+    // faint radial spokes (very subtle, echoing a console grid)
+    ctx.save();
+    ctx.globalAlpha = 0.05 * prog;
+    ctx.strokeStyle = COLOR.inkSoft;
+    ctx.lineWidth = 1;
+    for (var s = 0; s < 12; s++) {
+      var a = (s / 12) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a) * ringR[3], cy + Math.sin(a) * ringR[3]);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // the three hop rings
+    for (var k = 1; k <= 3; k++) {
+      var rr = ringR[k] * (0.85 + 0.15 * prog);
+      ctx.save();
+      ctx.globalAlpha = (0.16 - (k - 1) * 0.03) * prog;
+      ctx.strokeStyle = COLOR.inkSoft;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // ring label, placed at the top of each ring
+      ctx.save();
+      ctx.globalAlpha = 0.55 * prog;
+      ctx.font = '8px "IBM Plex Mono", monospace';
+      ctx.fillStyle = COLOR.inkSoft;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText(RING_LABELS[k], cx, cy - rr + 12);
+      ctx.restore();
+    }
+  }
+
+  // ---- sonar sweep line (subtle radial sweep) ------------------------------
+  function drawSweep(t) {
+    if (reduce) return;
+    // gentle continuous rotation; fades in once rings exist
+    var ringsIn = easeOut(inWindow(t, T.rings));
+    if (ringsIn <= 0) return;
+    var ang = (t / 4200) * Math.PI * 2 % (Math.PI * 2);
+
+    // a soft wedge gradient trailing the sweep line
+    var spread = 0.55;
+    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, ringR[3]);
+    grad.addColorStop(0, rgba(COLOR.cobaltRgb, 0.0));
+    grad.addColorStop(1, rgba(COLOR.cobaltRgb, 0.0));
+
+    ctx.save();
+    ctx.globalAlpha = 0.10 * ringsIn;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, ringR[3], ang - spread, ang);
+    ctx.closePath();
+    var wedge = ctx.createRadialGradient(cx, cy, 0, cx, cy, ringR[3]);
+    wedge.addColorStop(0, rgba(COLOR.cobaltRgb, 0.16));
+    wedge.addColorStop(1, rgba(COLOR.cobaltRgb, 0));
+    ctx.fillStyle = wedge;
+    ctx.fill();
+    ctx.restore();
+
+    // the leading sweep line
+    ctx.save();
+    ctx.globalAlpha = 0.22 * ringsIn;
+    ctx.strokeStyle = COLOR.cobalt;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(ang) * ringR[3], cy + Math.sin(ang) * ringR[3]);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ---- edges: straight radial segments parent->child -----------------------
+  function strokePartialLine(x1, y1, x2, y2, prog) {
+    if (prog <= 0) return;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x1 + (x2 - x1) * prog, y1 + (y2 - y1) * prog);
+    ctx.stroke();
+  }
+
+  function drawEdges(t) {
+    ctx.lineCap = "round";
+    for (var i = 0; i < EDGES.length; i++) {
+      var e = EDGES[i];
+      var src = nodeById(e.a), dst = nodeById(e.b);
+      var prog = easeOut(inWindow(t, edgeWindow(dst.hop)));
+      if (prog <= 0) continue;
+      var wt = edgeWeight(dst.hop);
+      ctx.strokeStyle = rgba(wt.rgb, wt.alpha);
+      ctx.lineWidth = wt.w;
+      strokePartialLine(nodeX(src), nodeY(src), nodeX(dst), nodeY(dst), prog);
+    }
+  }
+
+  // ---- red risk path overlay + inward travelling pulse ---------------------
+  function drawRiskPath(t) {
+    var riskProg = inWindow(t, T.risk);
+    if (riskProg <= 0) return;
+    var ease = easeInOut(riskProg);
+
+    // overlay red on the risk edges
+    ctx.lineCap = "round";
+    for (var i = 0; i < EDGES.length; i++) {
+      var e = EDGES[i];
+      if (!isRiskEdge(e)) continue;
+      var src = nodeById(e.a), dst = nodeById(e.b);
+      ctx.strokeStyle = rgba(COLOR.threatRgb, 0.30 + 0.55 * ease);
+      ctx.lineWidth = 1.8 + 1.1 * ease;
+      strokePartialLine(nodeX(src), nodeY(src), nodeX(dst), nodeY(dst), 1);
+    }
+
+    // travelling pulse flowing INWARD: outer flagged node -> subject
+    drawRiskPulse(t, ease);
+  }
+
+  function drawRiskPulse(t, ease) {
+    // build polyline of the risk path (outer-first, converging on subject)
+    var pts = [];
+    for (var i = 0; i < RISKPATH.length; i++) {
+      var n = nodeById(RISKPATH[i]);
+      pts.push({ x: nodeX(n), y: nodeY(n) });
+    }
+    var nSeg = pts.length - 1;
+    var localT = reduce ? 0.6 : ((t / 1100) % 1);
+    var global = localT * nSeg;
+    var segIdx = Math.min(nSeg - 1, Math.floor(global));
+    var segT = global - segIdx;
+    var p0 = pts[segIdx], p1 = pts[segIdx + 1];
+    var x = p0.x + (p1.x - p0.x) * segT;
+    var y = p0.y + (p1.y - p0.y) * segT;
+
+    var g = ctx.createRadialGradient(x, y, 0, x, y, 10);
+    g.addColorStop(0, rgba(COLOR.threatRgb, 0.65 * ease));
+    g.addColorStop(1, rgba(COLOR.threatRgb, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
+
+    ctx.globalAlpha = ease;
+    ctx.fillStyle = COLOR.threat;
+    ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // ---- nodes ---------------------------------------------------------------
+  function nodeAppear(t, n) {
+    if (n.kind === "subject") return easeOut(clamp01((t - 250) / 500));
+    var win = edgeWindow(n.hop);
+    var local = inWindow(t, win);
+    return easeOut(clamp01((local - 0.55) / 0.45));
+  }
+
+  function drawNodes(t) {
+    var riskEase = easeInOut(inWindow(t, T.risk));
+    for (var k = 0; k < NODES.length; k++) {
+      var n = NODES[k];
+      var appear = nodeAppear(t, n);
+      if (appear <= 0) continue;
+      drawNode(n, appear, t, riskEase);
+    }
+  }
+
+  function drawNode(n, appear, t, riskEase) {
+    var x = nodeX(n), y = nodeY(n);
+    var r = nodeRadius(n);
+    var rr = r * (0.45 + 0.55 * appear);
+    var onRisk = riskNodeSet[n.id];
+
+    // flagged: soft pulsing ring
+    if (n.kind === "flag") {
+      var pulse = reduce ? 0.5 : (Math.sin(t / 360 + n.id) * 0.5 + 0.5);
+      var rgR = rr + 6 + pulse * 5;
+      ctx.globalAlpha = appear * (0.5 - pulse * 0.30);
+      ctx.strokeStyle = COLOR.threat;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(x, y, rgR, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // subject: cobalt glow halo
+    if (n.kind === "subject") {
+      var glow = ctx.createRadialGradient(x, y, 0, x, y, 20);
+      glow.addColorStop(0, rgba(COLOR.cobaltRgb, 0.30 * appear));
+      glow.addColorStop(1, rgba(COLOR.cobaltRgb, 0));
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // fill colour by kind / distance saturation
+    var fill;
+    if (n.kind === "subject") fill = COLOR.cobaltFill;
+    else if (n.kind === "flag") fill = COLOR.threat;
+    else if (onRisk && riskEase > 0.1) fill = COLOR.threat;
+    else if (n.hop === 1) fill = COLOR.cobaltFill;
+    else if (n.hop === 2) fill = rgba(COLOR.cobaltRgb, 0.78);
+    else fill = rgba(COLOR.cobaltRgb, 0.48);
+
+    // white knockout so nodes read above rings/edges
+    ctx.globalAlpha = appear;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(x, y, rr + 1.7, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = fill;
+    ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+
+    // ---- labels ----
+    ctx.globalAlpha = appear * 0.96;
+    ctx.textBaseline = "alphabetic";
+    if (n.kind === "subject") {
+      ctx.font = '500 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = COLOR.cobalt;
+      ctx.textAlign = "left";
+      ctx.fillText("SUBJECT", x + rr + 9, y - 1);
+      ctx.font = '9px "IBM Plex Mono", monospace';
+      ctx.fillStyle = COLOR.inkSoft;
+      ctx.fillText(n.addr, x + rr + 9, y + 10);
+    } else if (n.kind === "flag") {
+      // place label radially outward so it never overlaps the centre
+      var a = (n.deg - 90) * Math.PI / 180;
+      var outward = Math.cos(a) >= 0 ? "left" : "right";
+      var lx = x + Math.cos(a) * (rr + 9);
+      var ly = y + Math.sin(a) * (rr + 9);
+      ctx.textAlign = outward;
+      ctx.font = '500 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = COLOR.threat;
+      ctx.fillText(n.label, lx, ly + 3);
+      ctx.font = '8.5px "IBM Plex Mono", monospace';
+      ctx.globalAlpha = appear * 0.8;
+      ctx.fillStyle = COLOR.inkSoft;
+      ctx.fillText(n.sub, lx, ly + 14);
+    } else if (n.addr) {
+      ctx.font = '8.5px "IBM Plex Mono", monospace';
+      ctx.fillStyle = COLOR.inkSoft;
+      ctx.textAlign = "left";
+      ctx.fillText(n.addr, x + rr + 7, y + 3);
+    }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "left";
+  }
+
+  // ---- compose scene -------------------------------------------------------
+  function drawScene(t, globalAlpha) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    ctx.globalAlpha = globalAlpha;
+
+    drawRings(t);
+    drawSweep(t);
+    drawEdges(t);
+    drawRiskPath(t);
+    drawNodes(t);
+
+    ctx.restore();
+  }
+
+  // ---- risk readout --------------------------------------------------------
+  var lastRiskText = "";
+  function updateReadout(t) {
+    var risk, note, flagged = false;
+    if (t < T.hop2[0]) {
+      risk = 0; note = "scanning…";
+    } else if (t < T.hop3[0]) {
+      risk = 0.14 * easeOut(inWindow(t, T.hop2));
+      note = "tracing lineage…";
+    } else if (t < T.risk[0]) {
+      risk = 0.20 + 0.10 * easeOut(inWindow(t, T.hop3));
+      note = "evaluating ancestors…";
+    } else if (t < T.risk[1]) {
+      risk = 0.30 + (0.84 - 0.30) * easeInOut(inWindow(t, T.risk));
+      note = "flagged provenance"; flagged = true;
+    } else {
+      risk = 0.84; note = "· OFAC @ 3 hops"; flagged = true;
+    }
+
+    var txt = risk.toFixed(2);
+    if (txt !== lastRiskText) { riskValEl.textContent = txt; lastRiskText = txt; }
+    riskValEl.className = "val" + (flagged ? " flagged" : "");
+    riskNoteEl.textContent = note;
+    riskNoteEl.style.color = flagged ? COLOR.threat : COLOR.inkSoft;
+  }
+
+  // ---- run loop ------------------------------------------------------------
+  var start = null;
+  function frame(ts) {
+    if (start === null) start = ts;
+    var t = (ts - start) % T.cycle;
+
+    var globalAlpha = 1;
+    if (t >= T.fade[0]) globalAlpha = 1 - easeInOut(inWindow(t, T.fade));
+    else if (t < 180) globalAlpha = easeOut(t / 180);
+
+    drawScene(t, globalAlpha);
+    updateReadout(t);
+    requestAnimationFrame(frame);
+  }
+
+  function drawStaticFinal() {
+    var t = T.hold[0] + 300;
+    drawScene(t, 1);
+    updateReadout(t);
+    riskValEl.textContent = "0.84";
+    riskValEl.className = "val flagged";
+    riskNoteEl.textContent = "· OFAC @ 3 hops";
+    riskNoteEl.style.color = COLOR.threat;
+  }
+
+  function boot() {
+    resize();
+    if (reduce) drawStaticFinal();
+    else requestAnimationFrame(frame);
+  }
+
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      resize();
+      if (reduce) drawStaticFinal();
+    }, 120);
+  });
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(boot);
+    setTimeout(function () { if (start === null && !reduce) boot(); }, 1200);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>
