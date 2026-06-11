@@ -309,27 +309,27 @@
   // ---- Genealogy layout: subject at right, ancestors fan out to the left ----
   // hop 0 = subject; higher hop = farther ancestor. The worst branch ends in
   // flagged (OFAC / mixer) ancestors. Coordinates are in the 820x400 viewBox.
-  var SUBJ = { id: "s", x: 690, y: 200, hop: 0, r: 9, subject: true,
+  var SUBJ = { id: "s", x: 690, y: 214, hop: 0, r: 9, subject: true,
                label: "SUBJECT", chip: "0x84f3…c2e1" };
 
   var NODES = [
     SUBJ,
-    // hop 1
-    { id: "a1", x: 522, y: 116, hop: 1, r: 6.5, parent: "s" },
-    { id: "a2", x: 522, y: 202, hop: 1, r: 6.5, parent: "s", bad: true, chip: "bc1q…m2v8" },
-    { id: "a3", x: 522, y: 292, hop: 1, r: 6.5, parent: "s" },
+    // hop 1 — neutral trunk stays level; the flagged branch peels upward
+    { id: "a1", x: 524, y: 214, hop: 1, r: 6.5, parent: "s" },
+    { id: "a2", x: 540, y: 126, hop: 1, r: 6.5, parent: "s", bad: true, chip: "bc1q…m2v8" },
+    { id: "a3", x: 524, y: 300, hop: 1, r: 6.5, parent: "s" },
     // hop 2
-    { id: "b1", x: 334, y: 70,  hop: 2, r: 5.5, parent: "a1" },
-    { id: "b2", x: 334, y: 150, hop: 2, r: 5.5, parent: "a1" },
-    { id: "b3", x: 334, y: 202, hop: 2, r: 5.5, parent: "a2", bad: true,
+    { id: "b1", x: 348, y: 178, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b2", x: 348, y: 244, hop: 2, r: 5.5, parent: "a1" },
+    { id: "b3", x: 384, y: 80,  hop: 2, r: 5.5, parent: "a2", bad: true,
       flag: "Tornado Cash", flagSub: "mixer · @ 2 hops" },
-    { id: "b4", x: 334, y: 262, hop: 2, r: 5.5, parent: "a3" },
-    { id: "b5", x: 334, y: 332, hop: 2, r: 5.5, parent: "a3" },
+    { id: "b4", x: 348, y: 312, hop: 2, r: 5.5, parent: "a3" },
+    { id: "b5", x: 348, y: 356, hop: 2, r: 5.5, parent: "a3" },
     // hop 3
-    { id: "c1", x: 150, y: 116, hop: 3, r: 4.5, parent: "b2" },
-    { id: "c2", x: 150, y: 202, hop: 3, r: 4.5, parent: "b3", bad: true,
+    { id: "c1", x: 166, y: 250, hop: 3, r: 4.5, parent: "b2" },
+    { id: "c2", x: 214, y: 58,  hop: 3, r: 4.5, parent: "b3", bad: true,
       flag: "OFAC SDN", flagSub: "flagged · @ 3 hops" },
-    { id: "c3", x: 150, y: 300, hop: 3, r: 4.5, parent: "b4" }
+    { id: "c3", x: 166, y: 330, hop: 3, r: 4.5, parent: "b4" }
   ];
 
   var byId = {};
