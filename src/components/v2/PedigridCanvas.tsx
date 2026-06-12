@@ -38,9 +38,10 @@ type PEdge = {
 /**
  * PEDIGRID lineage trace: a genealogy that reconstructs itself outward from the
  * subject over ~3s, the flagged path peeling off as an upward side branch and
- * lighting red as ancestors are reached, then holds and loops. Colours come from
- * theme CSS variables (works in light + dark, no rebuild on flip); pauses
- * offscreen; renders a clean static final frame under prefers-reduced-motion.
+ * lighting red as ancestors are reached. Plays once the first time it scrolls
+ * into view, then freezes in its final state (no loop). Colours come from theme
+ * CSS variables (works in light + dark, no rebuild on flip); renders the static
+ * final frame immediately under prefers-reduced-motion.
  */
 export function PedigridCanvas() {
   const ref = useRef<SVGSVGElement | null>(null);
@@ -288,12 +289,10 @@ export function PedigridCanvas() {
     gPulse.appendChild(pulseGlow);
     gPulse.appendChild(pulseDot);
 
-    // ---- animation engine (full reveal ~3s) ----
+    // ---- animation engine (plays once, ~3s, then freezes) ----
     const SUBJ_IN = 320;
     const HOP_DRAW = 800;
     const HOP_GAP = 130;
-    const HOLD = 1200;
-    const FADEOUT = 600;
 
     const hopEdges: Record<number, PEdge[]> = { 1: [], 2: [], 3: [] };
     EDGES.forEach((e) => hopEdges[e.hop].push(e));
@@ -304,7 +303,6 @@ export function PedigridCanvas() {
       tcur += HOP_DRAW + HOP_GAP;
     });
     const DRAW_END = SUBJ_IN + 3 * HOP_DRAW + 2 * HOP_GAP;
-    const CYCLE = DRAW_END + HOLD + FADEOUT;
 
     const badSeq = EDGES.filter((e) => e.bad).sort((a, b) => b.hop - a.hop);
 
@@ -360,111 +358,93 @@ export function PedigridCanvas() {
     let startTime: number | null = null;
     let raf = 0;
     let lastT = 0;
+    let started = false;
+    let finished = false;
+
+    const finish = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      finished = true;
+      renderStatic(); // freeze in the final state
+    };
 
     const frame = (ts: number) => {
       if (startTime === null) startTime = ts;
-      const t = (ts - startTime) % CYCLE;
-      if (t < lastT) resetCycle();
+      const t = ts - startTime;
       let dt = t - lastT;
       if (dt < 0) dt = t;
       lastT = t;
 
-      if (t < DRAW_END + HOLD) {
-        svg.style.opacity = "1";
-        nodeOp(SUBJ, ss(t / SUBJ_IN));
-        nodeScale(SUBJ, 0.6 + 0.4 * pop(t / SUBJ_IN));
-
-        [1, 2, 3].forEach((hop) => {
-          const start = hopStart[hop];
-          const local = (t - start) / HOP_DRAW;
-          const p = ss(local);
-          if (local <= 0) {
-            hopEdges[hop].forEach((e) => {
-              setEdge(e, 0);
-              e.scan!.setAttribute("opacity", "0");
-              e.scanCore!.setAttribute("opacity", "0");
-            });
-            return;
-          }
-          hopEdges[hop].forEach((e) => {
-            setEdge(e, p);
-            nodeOp(e.child, ss((p - 0.6) / 0.4));
-            nodeScale(e.child, 0.6 + 0.4 * pop((p - 0.55) / 0.45));
-            if (local > 0 && local < 1) {
-              const pt = e.node!.getPointAtLength(e.len! * Math.min(1, p));
-              const fade = Math.sin(p * Math.PI);
-              e.scan!.setAttribute("cx", String(pt.x));
-              e.scan!.setAttribute("cy", String(pt.y));
-              e.scan!.setAttribute("opacity", String(0.16 * fade));
-              e.scanCore!.setAttribute("cx", String(pt.x));
-              e.scanCore!.setAttribute("cy", String(pt.y));
-              e.scanCore!.setAttribute("opacity", String(0.7 * fade));
-            } else {
-              e.scan!.setAttribute("opacity", "0");
-              e.scanCore!.setAttribute("opacity", "0");
-            }
-          });
-        });
-
-        CHIPS.forEach((c) => {
-          const no = parseFloat(c.node.dom!.getAttribute("opacity") || "0");
-          const cur = parseFloat(c.dom.getAttribute("opacity") || "0");
-          const target = no > 0.7 ? 1 : 0;
-          c.dom.setAttribute("opacity", String(cur + (target - cur) * Math.min(1, dt / 260)));
-        });
-
-        let visBad = 0;
-        NODES.forEach((n) => {
-          if (n.bad && parseFloat(n.dom!.getAttribute("opacity") || "0") > 0.55) visBad++;
-        });
-        const settled = t >= DRAW_END;
-        const target = settled ? 0.84 : Math.min(0.84, visBad * 0.3);
-        riskShown += (target - riskShown) * Math.min(1, dt / 380);
-        if (Math.abs(target - riskShown) < 0.004) riskShown = target;
-        renderRisk(riskShown, settled && riskShown > 0.82);
-
-        const ph = (t % 1700) / 1700;
-        NODES.forEach((n) => {
-          if (!n.ring) return;
-          const vis = parseFloat(n.dom!.getAttribute("opacity") || "0");
-          if (vis > 0.4) {
-            const rp = ss(ph < 0.65 ? ph / 0.65 : 1);
-            n.ring.setAttribute("r", String(n.r + 5 + rp * 11));
-            n.ring.setAttribute("opacity", String(vis * (1 - ph) * 0.65));
-          } else {
-            n.ring.setAttribute("opacity", "0");
-          }
-        });
-
-        const fullBad = t >= DRAW_END - 220;
-        if (fullBad && badSeq.length) {
-          const loopT = ((t - (DRAW_END - 220)) % 1900) / 1900;
-          const nb = badSeq.length;
-          const fIdx = loopT * nb;
-          const ei = Math.min(nb - 1, Math.floor(fIdx));
-          const ep = fIdx - ei;
-          const edge = badSeq[ei];
-          const pt2 = edge.node!.getPointAtLength(edge.len! * (1 - ep));
-          const fade2 = Math.sin(loopT * Math.PI);
-          pulseDot.setAttribute("cx", String(pt2.x));
-          pulseDot.setAttribute("cy", String(pt2.y));
-          pulseDot.setAttribute("opacity", String(0.9 * fade2 + 0.1));
-          pulseGlow.setAttribute("cx", String(pt2.x));
-          pulseGlow.setAttribute("cy", String(pt2.y));
-          pulseGlow.setAttribute("opacity", String(0.18 * fade2));
-        } else {
-          pulseDot.setAttribute("opacity", "0");
-          pulseGlow.setAttribute("opacity", "0");
-        }
-      } else {
-        svg.style.opacity = String(1 - ss((t - (DRAW_END + HOLD)) / FADEOUT));
-        pulseDot.setAttribute("opacity", "0");
-        pulseGlow.setAttribute("opacity", "0");
-        EDGES.forEach((e) => {
-          e.scan!.setAttribute("opacity", "0");
-          e.scanCore!.setAttribute("opacity", "0");
-        });
+      if (t >= DRAW_END) {
+        finish();
+        return;
       }
+
+      svg.style.opacity = "1";
+      nodeOp(SUBJ, ss(t / SUBJ_IN));
+      nodeScale(SUBJ, 0.6 + 0.4 * pop(t / SUBJ_IN));
+
+      [1, 2, 3].forEach((hop) => {
+        const start = hopStart[hop];
+        const local = (t - start) / HOP_DRAW;
+        const p = ss(local);
+        if (local <= 0) {
+          hopEdges[hop].forEach((e) => {
+            setEdge(e, 0);
+            e.scan!.setAttribute("opacity", "0");
+            e.scanCore!.setAttribute("opacity", "0");
+          });
+          return;
+        }
+        hopEdges[hop].forEach((e) => {
+          setEdge(e, p);
+          nodeOp(e.child, ss((p - 0.6) / 0.4));
+          nodeScale(e.child, 0.6 + 0.4 * pop((p - 0.55) / 0.45));
+          if (local > 0 && local < 1) {
+            const pt = e.node!.getPointAtLength(e.len! * Math.min(1, p));
+            const fade = Math.sin(p * Math.PI);
+            e.scan!.setAttribute("cx", String(pt.x));
+            e.scan!.setAttribute("cy", String(pt.y));
+            e.scan!.setAttribute("opacity", String(0.16 * fade));
+            e.scanCore!.setAttribute("cx", String(pt.x));
+            e.scanCore!.setAttribute("cy", String(pt.y));
+            e.scanCore!.setAttribute("opacity", String(0.7 * fade));
+          } else {
+            e.scan!.setAttribute("opacity", "0");
+            e.scanCore!.setAttribute("opacity", "0");
+          }
+        });
+      });
+
+      CHIPS.forEach((c) => {
+        const no = parseFloat(c.node.dom!.getAttribute("opacity") || "0");
+        const cur = parseFloat(c.dom.getAttribute("opacity") || "0");
+        const target = no > 0.7 ? 1 : 0;
+        c.dom.setAttribute("opacity", String(cur + (target - cur) * Math.min(1, dt / 260)));
+      });
+
+      let visBad = 0;
+      NODES.forEach((n) => {
+        if (n.bad && parseFloat(n.dom!.getAttribute("opacity") || "0") > 0.55) visBad++;
+      });
+      const target = Math.min(0.84, visBad * 0.3);
+      riskShown += (target - riskShown) * Math.min(1, dt / 380);
+      if (Math.abs(target - riskShown) < 0.004) riskShown = target;
+      renderRisk(riskShown, false);
+
+      const ph = (t % 1700) / 1700;
+      NODES.forEach((n) => {
+        if (!n.ring) return;
+        const vis = parseFloat(n.dom!.getAttribute("opacity") || "0");
+        if (vis > 0.4) {
+          const rp = ss(ph < 0.65 ? ph / 0.65 : 1);
+          n.ring.setAttribute("r", String(n.r + 5 + rp * 11));
+          n.ring.setAttribute("opacity", String(vis * (1 - ph) * 0.65));
+        } else {
+          n.ring.setAttribute("opacity", "0");
+        }
+      });
+
       raf = requestAnimationFrame(frame);
     };
 
@@ -504,30 +484,21 @@ export function PedigridCanvas() {
     resetCycle();
     renderRisk(0, false);
 
-    let visible = true;
-    const start = () => {
-      if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
-    };
-    const stop = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = 0;
-      startTime = null;
-      lastT = 0;
-    };
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      if (visible) start();
-      else stop();
+    // play the reveal once, the first time it scrolls into view, then leave it frozen
+    const io = new IntersectionObserver((entries) => {
+      if (started || finished) return;
+      if (entries.some((e) => e.isIntersecting)) {
+        started = true;
+        startTime = null;
+        lastT = 0;
+        raf = requestAnimationFrame(frame);
+      }
     });
     io.observe(svg);
-    const onVis = () => (document.hidden ? stop() : start());
-    document.addEventListener("visibilitychange", onVis);
-    start();
 
     return () => {
-      stop();
+      if (raf) cancelAnimationFrame(raf);
       io.disconnect();
-      document.removeEventListener("visibilitychange", onVis);
     };
   }, []);
 
